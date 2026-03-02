@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\RentingPrototype.Application\RentingPrototype.Application.csproj" />
+    <ProjectReference Include="..\RentingPrototype.Infrastructure\RentingPrototype.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+  <Content Include="..\RentingPrototype.Infrastructure\rentingprototype-schema.sql">
+    <Link>rentingprototype-schema.sql</Link>
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+  </Content>
+</ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Contracts/" />
+    <Folder Include="Endpoints/" />
+    <Folder Include="Endpoints/Vehicles/" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
