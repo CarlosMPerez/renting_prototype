@@ -6,10 +6,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
   <Content Include="..\RentingPrototype.Infrastructure\rentingprototype-schema.sql">
     <Link>rentingprototype-schema.sql</Link>
     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -20,6 +16,11 @@
     <Folder Include="Contracts/" />
     <Folder Include="Endpoints/" />
     <Folder Include="Endpoints/Vehicles/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.13" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.12.53" />
   </ItemGroup>
 
   <PropertyGroup>
