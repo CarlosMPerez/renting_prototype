@@ -1,28 +1,57 @@
 using Microsoft.Data.Sqlite;
 using RentingPrototype.Api.Contracts;
-using RentingPrototype.Application.Vehicles;
-using RentingPrototype.Application.Vehicles.CreateVehicle;
+using RentingPrototype.Application.Vehicles.Commands;
+using RentingPrototype.Application.Vehicles.Queries;
 
 namespace RentingPrototype.Api.Endpoints.Vehicles;
 
 public static class VehiclesEndpoints
 {
-    public static IEndpointRouteBuilder MapVehicleEndpoints(this IEndpointRouteBuilder app)
+    public static RouteGroupBuilder MapVehicleEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/vehicles");
+        var group = app.MapGroup("/vehicles").WithTags("Vehicles");
+
+// TO-DO hacer que los endpoints de lectura sean tan elaborados como el de escritura, y crearlos en su propio método privado también
+
+        // GET/vehicles/{id}
+        group.MapGet("/{id:guid}", async (Guid id, GetVehicleByIdQueryHandler handler, CancellationToken token) 
+        =>
+        {
+            var vehicle = await handler.Handle(new VehicleQueryFilterDto(id), token);
+            return vehicle is null ? Results.NotFound() : Results.Ok(vehicle);
+        }).WithName("GetVehicleById");
+
+        // GET /vehicles
+        group.MapGet("/", async (GetAllVehiclesHandler handler, CancellationToken token) 
+        =>
+        {
+            var vehicles = await handler.Handle(new ListVehiclesQueryDto(), token);
+            return Results.Ok(vehicles);
+        }).WithName("GetAllVehicles");
+
+        // GET /vehicles/available
+        group.MapGet("/available", async (GetAvailableVehiclesHandler handler, CancellationToken token) 
+        =>
+        {
+            var vehicles = await handler.Handle(new ListVehiclesQueryDto(), token);
+            return Results.Ok(vehicles);
+        }).WithName("GetAvailableVehicles");
+
+        // POST 
         group.MapPost("/", CreateVehicle);
-        return app;
+
+        return group;
     }
 
     private static async Task<IResult> CreateVehicle(
-            CreateVehicleRequest request, 
-            CreateVehicleHandler handler, 
+            CreateVehicleRequest request,
+            CreateVehicleHandler handler,
             CancellationToken token)
     {
         try
         {
-            var cmd = new CreateVehicleCommand(request.LicensePlate, 
-                request.Make, request.Model, request.ManufacturingDateUtc);
+            var cmd = new CreateVehicleCommandDto(request.LicensePlate,
+                request.Brand, request.Model, request.ManufactureDateUtc);
             var result = await handler.HandleAsync(cmd, DateTime.UtcNow, token);
             return Results.Created($"/vehicles/{result.Id}", result);
         }

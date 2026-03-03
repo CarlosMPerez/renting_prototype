@@ -2,7 +2,7 @@ namespace RentingPrototype.Api.Contracts;
 
 public sealed record CreateVehicleRequest(
     string LicensePlate,
-    string Make,
+    string Brand,
     string Model,
-    DateTime ManufacturingDateUtc
+    DateTime ManufactureDateUtc
 );

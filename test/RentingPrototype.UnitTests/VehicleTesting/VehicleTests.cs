@@ -7,14 +7,14 @@ public class VehicleTests
     [Fact]
     public void Create_RejectsVehicleOlderThan5Years()
     {
-        var manufacturingDate = DateTime.UtcNow.AddYears(-5).AddDays(-1);
+        var manufactureDate = DateTime.UtcNow.AddYears(-5).AddDays(-1);
         var ex = Assert.Throws<InvalidOperationException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-TEST",
-                make: "Toyota",
+                brand: "Toyota",
                 model: "Corolla",
-                manufacturingDateUtc: manufacturingDate,
+                manufactureDateUtc: manufactureDate,
                 nowUtc: DateTime.UtcNow
                 )
         );
@@ -25,20 +25,20 @@ public class VehicleTests
     [Fact]
     public void Create_AllowsVehicleExactly5YearsOld()
     {
-        var manufacturingDate = DateTime.UtcNow.AddYears(-5); // borderline OK
+        var manufactureDate = DateTime.UtcNow.AddYears(-5); // borderline OK
 
         var v = Vehicle.Create(
             id: Guid.NewGuid(),
             licensePlate: "1234-ABC",
-            make: "Toyota",
+            brand: "Toyota",
             model: "Corolla",
-            manufacturingDateUtc: manufacturingDate,
+            manufactureDateUtc: manufactureDate,
             nowUtc: DateTime.UtcNow);
 
         Assert.Equal("1234-ABC", v.LicensePlate);
-        Assert.Equal("Toyota", v.Make);
+        Assert.Equal("Toyota", v.Brand);
         Assert.Equal("Corolla", v.Model);
-        Assert.Equal(manufacturingDate, v.ManufacturingDateUtc);
+        Assert.Equal(manufactureDate, v.ManufactureDateUtc);
     }
 
     [Theory]
@@ -50,13 +50,11 @@ public class VehicleTests
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: plate,
-                make: "Toyota",
+                brand: "Toyota",
                 model: "Corolla",
-                manufacturingDateUtc: DateTime.UtcNow.AddYears(-3),
+                manufactureDateUtc: DateTime.UtcNow.AddYears(-3),
                 nowUtc: DateTime.UtcNow));
     }
-    // if (string.IsNullOrWhiteSpace(make)) throw new ArgumentException("Make is required.", nameof(make));
-    // if (string.IsNullOrWhiteSpace(model)) throw new ArgumentException("Model is required.", nameof(model));
 
     [Fact]
     public void Create_TrimsInputStrings()
@@ -64,13 +62,13 @@ public class VehicleTests
         var v = Vehicle.Create(
             id: Guid.NewGuid(),
             licensePlate: "  1234-ABC  ",
-            make: "  Toyota ",
+            brand: "  Toyota ",
             model: " Corolla  ",
-            manufacturingDateUtc: DateTime.UtcNow.AddYears(-3),
+            manufactureDateUtc: DateTime.UtcNow.AddYears(-3),
             nowUtc: DateTime.UtcNow);
 
         Assert.Equal("1234-ABC", v.LicensePlate);
-        Assert.Equal("Toyota", v.Make);
+        Assert.Equal("Toyota", v.Brand);
         Assert.Equal("Corolla", v.Model);
     }
 
@@ -81,9 +79,9 @@ public class VehicleTests
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-                make: "Toyota",
+                brand: "Toyota",
                 model: "Corolla",
-                manufacturingDateUtc: DateTime.UtcNow.AddYears(-3),
+                manufactureDateUtc: DateTime.UtcNow.AddYears(-3),
                 nowUtc: DateTime.UtcNow)
         );
 
@@ -91,19 +89,19 @@ public class VehicleTests
     }
 
     [Fact]
-    public void Create_RejectsLongMake()
+    public void Create_RejectsLongBrand()
     {
         var ex = Assert.Throws<ArgumentException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-ABC",
-                make: new string('m', 101),
+                brand: new string('m', 101),
                 model: "Corolla",
-                manufacturingDateUtc: DateTime.UtcNow.AddYears(-3),
+                manufactureDateUtc: DateTime.UtcNow.AddYears(-3),
                 nowUtc: DateTime.UtcNow)
         );
 
-        Assert.Contains("make max length", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("brand max length", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -113,9 +111,9 @@ public class VehicleTests
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-ABC",
-                make: "Toyota",
+                brand: "Toyota",
                 model: new string('m', 101),
-                manufacturingDateUtc: DateTime.UtcNow.AddYears(-3),
+                manufactureDateUtc: DateTime.UtcNow.AddYears(-3),
                 nowUtc: DateTime.UtcNow)
         );
 
@@ -126,19 +124,21 @@ public class VehicleTests
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public void Create_RejectsNullOrEmptyMake(string? make)
+    public void Create_RejectsNullOrEmptyBrand(string? brand)
     {
+#pragma warning disable CS8604 // Possible null reference argument.
         var ex = Assert.Throws<ArgumentException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-ABC",
-                make: make,
+                brand: brand,
                 model: "Corolla",
-                manufacturingDateUtc: DateTime.UtcNow.AddYears(-3),
+                manufactureDateUtc: DateTime.UtcNow.AddYears(-3),
                 nowUtc: DateTime.UtcNow)
         );
+#pragma warning restore CS8604 // Possible null reference argument.
 
-        Assert.Contains("make is required", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("brand is required", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Theory]
@@ -147,15 +147,17 @@ public class VehicleTests
     [InlineData(null)]
     public void Create_RejectsNullOrEmptyModel(string? model)
     {
+#pragma warning disable CS8604 // Possible null reference argument.
         var ex = Assert.Throws<ArgumentException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-ABC",
-                make: "Toyota",
+                brand: "Toyota",
                 model: model,
-                manufacturingDateUtc: DateTime.UtcNow.AddYears(-3),
+                manufactureDateUtc: DateTime.UtcNow.AddYears(-3),
                 nowUtc: DateTime.UtcNow)
         );
+#pragma warning restore CS8604 // Possible null reference argument.
 
         Assert.Contains("model is required", ex.Message, StringComparison.OrdinalIgnoreCase);
     }

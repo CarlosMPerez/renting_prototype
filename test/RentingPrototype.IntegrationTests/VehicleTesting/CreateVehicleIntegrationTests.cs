@@ -19,9 +19,9 @@ public sealed class CreateVehicleIntegrationTests
         var payload = new
         {
             licensePlate = "9999-ZZZ",
-            make = "Honda",
+            brand = "Honda",
             model = "Civic",
-            manufacturingDateUtc = "2024-01-01T00:00:00Z"
+            manufactureDateUtc = "2024-01-01T00:00:00Z"
         };
 
         var res = await client.PostAsJsonAsync("/vehicles", payload);

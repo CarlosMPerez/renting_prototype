@@ -2,7 +2,7 @@ using RentingPrototype.Domain.Vehicles;
 
 namespace RentingPrototype.Application.Vehicles.Ports;
 
-public interface IVehicleRepository
+public interface IVehicleCommandRepository
 {
     Task AddAsync(Vehicle vehicle, CancellationToken token);
 }

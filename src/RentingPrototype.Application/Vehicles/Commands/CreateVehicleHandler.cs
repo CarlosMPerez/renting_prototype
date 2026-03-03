@@ -1,30 +1,31 @@
 
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Vehicles.CreateVehicle;
 using RentingPrototype.Application.Vehicles.Ports;
 using RentingPrototype.Domain.Vehicles;
 
-namespace RentingPrototype.Application.Vehicles;
+namespace RentingPrototype.Application.Vehicles.Commands;
+
+public sealed record CreateVehicleResultDto(Guid Id);
 
 public sealed class CreateVehicleHandler
 {
-    private readonly IVehicleRepository _repo;
+    private readonly IVehicleCommandRepository _repo;
     private readonly IUnitOfWork _uow;
 
-    public CreateVehicleHandler(IVehicleRepository repo, IUnitOfWork uow)
+    public CreateVehicleHandler(IVehicleCommandRepository repo, IUnitOfWork uow)
     {
         _repo = repo;
         _uow = uow;
     }
 
-    public async Task<CreateVehicleResult> HandleAsync(CreateVehicleCommand cmd, DateTime nowUtc, CancellationToken token)
+    public async Task<CreateVehicleResultDto> HandleAsync(CreateVehicleCommandDto dto, DateTime nowUtc, CancellationToken token)
     {
         var vehicle = Vehicle.Create(
             id: Guid.NewGuid(),
-            licensePlate: cmd.LicensePlate,
-            make: cmd.Make,
-            model: cmd.Model,
-            manufacturingDateUtc: cmd.ManufacturingDateUtc,
+            licensePlate: dto.LicensePlate,
+            brand: dto.Brand,
+            model: dto.Model,
+            manufactureDateUtc: dto.ManufactureDateUtc,
             nowUtc: nowUtc);
 
         await _uow.BeginAsync(token);
@@ -32,7 +33,7 @@ public sealed class CreateVehicleHandler
         {
             await _repo.AddAsync(vehicle, token);
             await _uow.CommitAsync(token);
-            return new CreateVehicleResult(vehicle.Id);
+            return new CreateVehicleResultDto(vehicle.Id);
         }
         catch
         {

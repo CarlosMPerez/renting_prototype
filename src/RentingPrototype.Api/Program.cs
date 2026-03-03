@@ -2,11 +2,12 @@ using Microsoft.Data.Sqlite;
 using Scalar.AspNetCore;
 using RentingPrototype.Api.Endpoints.Vehicles;
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Vehicles;
+using RentingPrototype.Application.Vehicles.Commands;
 using RentingPrototype.Application.Vehicles.Ports;
 using RentingPrototype.Infrastructure.Persistence.Sqlite;
 using RentingPrototype.Infrastructure.Persistence.SQLite;
 using RentingPrototype.Infrastructure.Vehicles;
+using RentingPrototype.Application.Vehicles.Queries;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,11 +21,15 @@ builder.Services.AddSingleton<ISqliteConnectionFactory>(_ => new SqliteConnectio
 builder.Services.AddScoped<SqliteUnitOfWork>();
 builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<SqliteUnitOfWork>());
 
-// Repo scoped
-builder.Services.AddScoped<IVehicleRepository, SqliteVehicleRepository>();
+// Repos scoped
+builder.Services.AddScoped<IVehicleCommandRepository, SqliteVehicleCommandRepository>();
+builder.Services.AddScoped<IVehicleQueryRepository, SqliteVehicleQueryRepository>();
 
-// Handler scoped
+// Handlers scoped
 builder.Services.AddScoped<CreateVehicleHandler>();
+builder.Services.AddScoped<GetVehicleByIdQueryHandler>();
+builder.Services.AddScoped<GetAllVehiclesHandler>();
+builder.Services.AddScoped<GetAvailableVehiclesHandler>();
 
 builder.Services.AddOpenApi();
 

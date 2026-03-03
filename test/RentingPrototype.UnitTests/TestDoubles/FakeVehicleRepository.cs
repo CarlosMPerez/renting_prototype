@@ -3,7 +3,7 @@ using RentingPrototype.Domain.Vehicles;
 
 namespace RentingPrototype.UnitTests.TestDoubles;
 
-public sealed class FakeVehicleRepository : IVehicleRepository
+public sealed class FakeVehicleRepository : IVehicleCommandRepository
 {
     public bool Added { get; private set; }
     public bool ThrowOnAdd { get; set; }

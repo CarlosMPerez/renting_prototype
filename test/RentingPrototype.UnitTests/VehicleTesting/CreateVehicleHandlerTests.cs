@@ -1,5 +1,4 @@
-using RentingPrototype.Application.Vehicles;
-using RentingPrototype.Application.Vehicles.CreateVehicle;
+using RentingPrototype.Application.Vehicles.Commands;
 using RentingPrototype.UnitTests.TestDoubles;
 
 namespace RentingPrototype.UnitTests.VehicleTesting;
@@ -13,7 +12,7 @@ public sealed class CreateVehicleHandlerTests
         var uow = new FakeUnitOfWork();
         var handler = new CreateVehicleHandler(repo, uow);
 
-        var cmd = new CreateVehicleCommand("1234-ABC", "Toyota", "Corolla", DateTime.UtcNow.AddYears(-3));
+        var cmd = new CreateVehicleCommandDto("1234-ABC", "Toyota", "Corolla", DateTime.UtcNow.AddYears(-3));
         var result = await handler.HandleAsync(cmd, DateTime.UtcNow, CancellationToken.None);
 
         Assert.True(uow.Begun);
@@ -30,7 +29,7 @@ public sealed class CreateVehicleHandlerTests
         var uow = new FakeUnitOfWork();
         var handler = new CreateVehicleHandler(repo, uow);
 
-        var cmd = new CreateVehicleCommand("1234-ABC", "Toyota", "Corolla", DateTime.UtcNow.AddYears(-3));
+        var cmd = new CreateVehicleCommandDto("1234-ABC", "Toyota", "Corolla", DateTime.UtcNow.AddYears(-3));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             handler.HandleAsync(cmd, DateTime.UtcNow, CancellationToken.None));

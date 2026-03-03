@@ -7,11 +7,11 @@ CREATE TABLE IF NOT EXISTS vehicles (
     id TEXT NOT NULL PRIMARY KEY,  -- GUID (e.g. '6f1c1b8e-...')
     license_plate TEXT NOT NULL
         CHECK (length(license_plate) <= 20),
-    make TEXT NOT NULL
-        CHECK (length(make) <= 100),
+    brand TEXT NOT NULL
+        CHECK (length(brand) <= 100),
     model TEXT NOT NULL
         CHECK (length(model) <= 100),
-    manufacturing_date TEXT NOT NULL -- ISO-8601 datetime string recommended
+    manufacture_date TEXT NOT NULL -- ISO-8601 datetime string recommended
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_vehicles_license_plate
