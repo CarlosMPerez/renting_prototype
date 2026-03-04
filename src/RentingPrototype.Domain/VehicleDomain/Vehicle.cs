@@ -1,4 +1,4 @@
-namespace RentingPrototype.Domain.Vehicles;
+namespace RentingPrototype.Domain.VehicleDomain;
 
 public sealed class Vehicle
 {

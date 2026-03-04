@@ -1,7 +1,7 @@
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Vehicles.Ports;
+using RentingPrototype.Application.Vehicle.Interfaces;
 
-namespace RentingPrototype.Application.Vehicles.Queries;
+namespace RentingPrototype.Application.Vehicle.Queries;
 
 public sealed record VehicleQueryFilterDto(Guid Id);
 

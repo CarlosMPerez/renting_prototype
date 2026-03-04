@@ -1,15 +1,15 @@
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Vehicles.Ports;
+using RentingPrototype.Application.Vehicle.Interfaces;
 
-namespace RentingPrototype.Application.Vehicles.Queries;
+namespace RentingPrototype.Application.Vehicle.Queries;
 
 public sealed record ListVehiclesQueryDto;
 
-public class GetAllVehiclesHandler : IQueryHandler<ListVehiclesQueryDto, IReadOnlyList<VehicleQueryResultDto>>
+public class GetAllVehiclesQueryHandler : IQueryHandler<ListVehiclesQueryDto, IReadOnlyList<VehicleQueryResultDto>>
 {
     private readonly IVehicleQueryRepository _repo;
 
-    public GetAllVehiclesHandler(IVehicleQueryRepository repo)
+    public GetAllVehiclesQueryHandler(IVehicleQueryRepository repo)
         => _repo = repo;
 
     public Task<IReadOnlyList<VehicleQueryResultDto>> Handle(ListVehiclesQueryDto _, CancellationToken token)

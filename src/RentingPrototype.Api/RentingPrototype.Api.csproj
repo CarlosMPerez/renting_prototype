@@ -13,9 +13,7 @@
 </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Contracts/" />
-    <Folder Include="Endpoints/" />
-    <Folder Include="Endpoints/Vehicles/" />
+    <Folder Include="Endpoints/Vehicle/" />
   </ItemGroup>
 
   <ItemGroup>

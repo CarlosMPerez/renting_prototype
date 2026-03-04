@@ -1,9 +1,9 @@
-using RentingPrototype.Application.Vehicles.Ports;
-using RentingPrototype.Domain.Vehicles;
+using RentingPrototype.Application.Vehicle.Interfaces;
+using RentingPrototype.Domain.VehicleDomain;
 
 namespace RentingPrototype.UnitTests.TestDoubles;
 
-public sealed class FakeVehicleRepository : IVehicleCommandRepository
+public sealed class FakeCommandVehicleRepository : IVehicleCommandRepository
 {
     public bool Added { get; private set; }
     public bool ThrowOnAdd { get; set; }

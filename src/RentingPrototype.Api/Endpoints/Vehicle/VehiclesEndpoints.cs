@@ -1,20 +1,19 @@
 using Microsoft.Data.Sqlite;
-using RentingPrototype.Api.Contracts;
-using RentingPrototype.Application.Vehicles.Commands;
-using RentingPrototype.Application.Vehicles.Queries;
+using RentingPrototype.Application.Vehicle.Commands;
+using RentingPrototype.Application.Vehicle.Queries;
 
-namespace RentingPrototype.Api.Endpoints.Vehicles;
+namespace RentingPrototype.Api.Endpoints.Vehicle;
 
-public static class VehiclesEndpoints
+public static class VehicleEndpoints
 {
     public static RouteGroupBuilder MapVehicleEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/vehicles").WithTags("Vehicles");
 
-// TO-DO hacer que los endpoints de lectura sean tan elaborados como el de escritura, y crearlos en su propio método privado también
+        // TO-DO hacer que los endpoints de lectura sean tan elaborados como el de escritura, y crearlos en su propio método privado también
 
         // GET/vehicles/{id}
-        group.MapGet("/{id:guid}", async (Guid id, GetVehicleByIdQueryHandler handler, CancellationToken token) 
+        group.MapGet("/{id:guid}", async (Guid id, GetVehicleByIdQueryHandler handler, CancellationToken token)
         =>
         {
             var vehicle = await handler.Handle(new VehicleQueryFilterDto(id), token);
@@ -22,7 +21,7 @@ public static class VehiclesEndpoints
         }).WithName("GetVehicleById");
 
         // GET /vehicles
-        group.MapGet("/", async (GetAllVehiclesHandler handler, CancellationToken token) 
+        group.MapGet("/", async (GetAllVehiclesQueryHandler handler, CancellationToken token)
         =>
         {
             var vehicles = await handler.Handle(new ListVehiclesQueryDto(), token);
@@ -30,7 +29,7 @@ public static class VehiclesEndpoints
         }).WithName("GetAllVehicles");
 
         // GET /vehicles/available
-        group.MapGet("/available", async (GetAvailableVehiclesHandler handler, CancellationToken token) 
+        group.MapGet("/available", async (GetAvailableVehiclesQueryHandler handler, CancellationToken token)
         =>
         {
             var vehicles = await handler.Handle(new ListVehiclesQueryDto(), token);
@@ -44,7 +43,7 @@ public static class VehiclesEndpoints
     }
 
     private static async Task<IResult> CreateVehicle(
-            CreateVehicleRequest request,
+            CreateVehicleCommandDto request,
             CreateVehicleHandler handler,
             CancellationToken token)
     {

@@ -1,4 +1,4 @@
-namespace RentingPrototype.Application.Vehicles.Commands;
+namespace RentingPrototype.Application.Vehicle.Commands;
 
 public sealed record CreateVehicleCommandDto(
     string LicensePlate,

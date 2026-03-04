@@ -1,4 +1,4 @@
-using RentingPrototype.Application.Vehicles.Commands;
+using RentingPrototype.Application.Vehicle.Commands;
 using RentingPrototype.UnitTests.TestDoubles;
 
 namespace RentingPrototype.UnitTests.VehicleTesting;
@@ -8,7 +8,7 @@ public sealed class CreateVehicleHandlerTests
     [Fact]
     public async Task HandleAsync_Begins_Adds_Commits()
     {
-        var repo = new FakeVehicleRepository();
+        var repo = new FakeCommandVehicleRepository();
         var uow = new FakeUnitOfWork();
         var handler = new CreateVehicleHandler(repo, uow);
 
@@ -25,7 +25,7 @@ public sealed class CreateVehicleHandlerTests
     [Fact]
     public async Task HandleAsync_WhenRepoFails_RollsBack()
     {
-        var repo = new FakeVehicleRepository { ThrowOnAdd = true };
+        var repo = new FakeCommandVehicleRepository { ThrowOnAdd = true };
         var uow = new FakeUnitOfWork();
         var handler = new CreateVehicleHandler(repo, uow);
 

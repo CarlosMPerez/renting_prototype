@@ -1,9 +1,8 @@
-
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Vehicles.Ports;
-using RentingPrototype.Domain.Vehicles;
+using RentingPrototype.Application.Vehicle.Interfaces;
+using VehicleDomain = RentingPrototype.Domain.VehicleDomain;
 
-namespace RentingPrototype.Application.Vehicles.Commands;
+namespace RentingPrototype.Application.Vehicle.Commands;
 
 public sealed record CreateVehicleResultDto(Guid Id);
 
@@ -20,7 +19,7 @@ public sealed class CreateVehicleHandler
 
     public async Task<CreateVehicleResultDto> HandleAsync(CreateVehicleCommandDto dto, DateTime nowUtc, CancellationToken token)
     {
-        var vehicle = Vehicle.Create(
+        var vehicle = VehicleDomain.Vehicle.Create(
             id: Guid.NewGuid(),
             licensePlate: dto.LicensePlate,
             brand: dto.Brand,

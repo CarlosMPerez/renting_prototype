@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace RentingPrototype.Application.Vehicles.Queries;
+namespace RentingPrototype.Application.Vehicle.Queries;
 
 public sealed record VehicleQueryResultDto(
     Guid Id,

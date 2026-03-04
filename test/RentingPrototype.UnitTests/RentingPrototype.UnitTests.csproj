@@ -29,8 +29,4 @@
     <ProjectReference Include="..\..\src\RentingPrototype.Application\RentingPrototype.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="TestDoubles/" />
-  </ItemGroup>
-
 </Project>

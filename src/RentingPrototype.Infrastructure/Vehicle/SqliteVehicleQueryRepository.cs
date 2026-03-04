@@ -1,9 +1,9 @@
 using Dapper;
-using RentingPrototype.Application.Vehicles.Ports;
-using RentingPrototype.Application.Vehicles.Queries;
+using RentingPrototype.Application.Vehicle.Interfaces;
+using RentingPrototype.Application.Vehicle.Queries;
 using RentingPrototype.Infrastructure.Persistence.Sqlite;
 
-namespace RentingPrototype.Infrastructure.Vehicles;
+namespace RentingPrototype.Infrastructure.Vehicle;
 
 public sealed class SqliteVehicleQueryRepository : IVehicleQueryRepository
 {
@@ -42,10 +42,10 @@ public sealed class SqliteVehicleQueryRepository : IVehicleQueryRepository
             v.model           AS Model,
             v.manufacture_date AS ManufactureDate
         FROM vehicles v
-        LEFT JOIN renting_history rh
-            ON rh.id_vehicle = v.id
+        LEFT JOIN rental_history rh
+            ON rh.vehicle_id = v.id
            AND rh.end_date IS NULL
-        WHERE rh.id_vehicle IS NULL;
+        WHERE rh.vehicle_id IS NULL;
         """;
 
         using var con = _factory.CreateConnection();
@@ -72,6 +72,6 @@ public sealed class SqliteVehicleQueryRepository : IVehicleQueryRepository
         using var con = _factory.CreateConnection();
         return await con
             .QuerySingleOrDefaultAsync<VehicleQueryResultDto>(
-                new CommandDefinition(sql, new { Id = id }, cancellationToken: token));
+                new CommandDefinition(sql, new { Id = id.ToString("D") }, cancellationToken: token));
     }
 }

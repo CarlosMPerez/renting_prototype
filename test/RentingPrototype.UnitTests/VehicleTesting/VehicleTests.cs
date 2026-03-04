@@ -1,4 +1,4 @@
-﻿using RentingPrototype.Domain.Vehicles;
+﻿using RentingPrototype.Domain.VehicleDomain;
 
 namespace RentingPrototype.UnitTests.VehicleTesting;
 

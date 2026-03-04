@@ -1,6 +1,6 @@
-using RentingPrototype.Application.Vehicles.Queries;
+using RentingPrototype.Application.Vehicle.Queries;
 
-namespace RentingPrototype.Application.Vehicles.Ports;
+namespace RentingPrototype.Application.Vehicle.Interfaces;
 
 public interface IVehicleQueryRepository
 {

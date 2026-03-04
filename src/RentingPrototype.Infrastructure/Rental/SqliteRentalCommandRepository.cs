@@ -1,0 +1,61 @@
+using Dapper;
+using RentingPrototype.Application.Rental.Interfaces;
+using RentingPrototype.Infrastructure.Persistence.SQLite;
+using RentalDomain = RentingPrototype.Domain.RentalDomain;
+
+namespace RentingPrototype.Infrastructure.Rental;
+
+public sealed class SqliteRentalCommandRepository : IRentalCommandRepository
+{
+    private readonly SqliteUnitOfWork _uow;
+
+    public SqliteRentalCommandRepository(SqliteUnitOfWork uow)
+    {
+        _uow = uow;
+    }
+
+    public async Task CreateAsync(RentalDomain.Rental rental, CancellationToken token)
+    {
+        if (_uow.Connection is null || _uow.Transaction is null)
+            throw new InvalidOperationException("UnitOfWork has not been started.");
+
+        const string sql = @"
+            INSERT INTO rental_history (id, customer_id, vehicle_id, start_date, end_date)
+            VALUES
+            (@Id, @CustomerId, @VehicleId, @StartDate, NULL);
+        ";
+
+        var cmd = new CommandDefinition(sql,
+            new
+            {
+                Id = rental.Id.ToString("D"),
+                CustomerId = rental.CustomerId.ToString("D"),
+                VehicleId = rental.VehicleId.ToString("D"),
+                rental.StartDate
+            }, transaction: _uow.Transaction, cancellationToken: token);
+
+        await _uow.Connection.ExecuteAsync(cmd);
+    }
+
+    public async Task UpdateAsync(Domain.RentalDomain.Rental rental, CancellationToken token)
+    {
+        if (_uow.Connection is null || _uow.Transaction is null)
+            throw new InvalidOperationException("UnitOfWork has not been started.");
+
+        const string sql = @"
+            UPDATE rental_history SET 
+                end_date = @EndDate
+            WHERE
+            id = @Id;
+        ";
+
+        var cmd = new CommandDefinition(sql,
+            new
+            {
+                Id = rental.Id.ToString("D"),
+                rental.EndDate
+            }, transaction: _uow.Transaction, cancellationToken: token);
+
+        await _uow.Connection.ExecuteAsync(cmd);
+    }
+}

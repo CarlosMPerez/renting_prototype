@@ -1,9 +1,9 @@
 using Dapper;
-using RentingPrototype.Application.Vehicles.Ports;
-using RentingPrototype.Domain.Vehicles;
+using RentingPrototype.Application.Vehicle.Interfaces;
+using VehicleDomain = RentingPrototype.Domain.VehicleDomain;
 using RentingPrototype.Infrastructure.Persistence.SQLite;
 
-namespace RentingPrototype.Infrastructure.Vehicles;
+namespace RentingPrototype.Infrastructure.Vehicle;
 
 public sealed class SqliteVehicleCommandRepository : IVehicleCommandRepository
 {
@@ -14,7 +14,7 @@ public sealed class SqliteVehicleCommandRepository : IVehicleCommandRepository
         _uow = uow;
     }
 
-    public async Task AddAsync(Vehicle vehicle, CancellationToken token)
+    public async Task AddAsync(VehicleDomain.Vehicle vehicle, CancellationToken token)
     {
         if (_uow.Connection is null || _uow.Transaction is null)
             throw new InvalidOperationException("UnitOfWork has not been started.");
@@ -28,7 +28,7 @@ public sealed class SqliteVehicleCommandRepository : IVehicleCommandRepository
         var cmd = new CommandDefinition(sql,
             new
             {
-                Id = vehicle.Id.ToString(),
+                Id = vehicle.Id.ToString("D"),
                 vehicle.LicensePlate,
                 vehicle.Brand,
                 vehicle.Model,

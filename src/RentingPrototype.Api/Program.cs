@@ -1,13 +1,18 @@
 using Microsoft.Data.Sqlite;
 using Scalar.AspNetCore;
-using RentingPrototype.Api.Endpoints.Vehicles;
+using RentingPrototype.Api.Endpoints.Vehicle;
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Vehicles.Commands;
-using RentingPrototype.Application.Vehicles.Ports;
+using RentingPrototype.Application.Vehicle.Commands;
+using RentingPrototype.Application.Vehicle.Interfaces;
 using RentingPrototype.Infrastructure.Persistence.Sqlite;
 using RentingPrototype.Infrastructure.Persistence.SQLite;
-using RentingPrototype.Infrastructure.Vehicles;
-using RentingPrototype.Application.Vehicles.Queries;
+using RentingPrototype.Infrastructure.Vehicle;
+using RentingPrototype.Application.Vehicle.Queries;
+using RentingPrototype.Api.Endpoints.Rental;
+using RentingPrototype.Infrastructure.Rental;
+using RentingPrototype.Application.Rental.Interfaces;
+using RentingPrototype.Application.Rental.Commands;
+using RentingPrototype.Application.Rental.Queries;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,18 +29,28 @@ builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<SqliteUnitOf
 // Repos scoped
 builder.Services.AddScoped<IVehicleCommandRepository, SqliteVehicleCommandRepository>();
 builder.Services.AddScoped<IVehicleQueryRepository, SqliteVehicleQueryRepository>();
+builder.Services.AddScoped<IRentalCommandRepository, SqliteRentalCommandRepository>();
+builder.Services.AddScoped<IRentalQueryRepository, SqliteRentalQueryRepository>();
+
 
 // Handlers scoped
 builder.Services.AddScoped<CreateVehicleHandler>();
 builder.Services.AddScoped<GetVehicleByIdQueryHandler>();
-builder.Services.AddScoped<GetAllVehiclesHandler>();
-builder.Services.AddScoped<GetAvailableVehiclesHandler>();
+builder.Services.AddScoped<GetAllVehiclesQueryHandler>();
+builder.Services.AddScoped<GetAvailableVehiclesQueryHandler>();
+
+builder.Services.AddScoped<CreateRentalHandler>();
+builder.Services.AddScoped<UpdateRentalHandler>();
+builder.Services.AddScoped<GetRentalByIdQueryHandler>();
+
+
 
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
 app.MapVehicleEndpoints();
+app.MapRentalsEndpoints();
 
 app.MapOpenApi("/openapi/{documentname].json}");
 app.MapScalarApiReference(options =>
@@ -81,7 +96,7 @@ string CreateMinimalDbSchema()
         command.CommandText = schemaSql;
         command.ExecuteNonQuery();
 
-        Console.WriteLine("Database created and schema applied.");
+        Console.WriteLine("Database created, seed initial data inserted.");
     }
 
     return cnnString;
