@@ -3,7 +3,6 @@
   <ItemGroup>
     <ProjectReference Include="..\RentingPrototype.Application\RentingPrototype.Application.csproj" />
     <ProjectReference Include="..\RentingPrototype.Domain\RentingPrototype.Domain.csproj" />
-    <None Include="rentingprototype-schema.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
