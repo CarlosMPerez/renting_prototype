@@ -10,6 +10,14 @@ public sealed record RentalQueryResultDto(
     DateTime? EndDate
     )
 {
+    /// <summary>
+    /// Materialization constructor used by Dapper when SQLite returns text values.
+    /// </summary>
+    /// <param name="id">Rental identifier as string.</param>
+    /// <param name="customerId">Customer identifier as string.</param>
+    /// <param name="vehicleId">Vehicle identifier as string.</param>
+    /// <param name="startDate">Start date as string.</param>
+    /// <param name="endDate">Optional end date as string.</param>
     public RentalQueryResultDto(
         string id,
         string customerId,
@@ -25,6 +33,11 @@ public sealed record RentalQueryResultDto(
     {
     }
 
+    /// <summary>
+    /// Parses a SQLite date representation to <see cref="DateTime"/>.
+    /// </summary>
+    /// <param name="value">Date value to parse.</param>
+    /// <returns>The parsed date.</returns>
     private static DateTime ParseDate(string value)
     {
         return DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);

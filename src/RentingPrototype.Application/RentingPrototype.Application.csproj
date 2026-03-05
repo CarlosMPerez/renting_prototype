@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <Folder Include="Abstractions/" />
+    <Folder Include="RentalHistory/Interfaces/" />
+    <Folder Include="RentalHistory/Queries/CustomerRentalHistory/" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Folder Include="Rental/" />
+    <Folder Include="RentalHistory/" />
   </ItemGroup>
 
   <PropertyGroup>

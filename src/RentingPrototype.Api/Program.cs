@@ -13,11 +13,16 @@ using RentingPrototype.Infrastructure.Rental;
 using RentingPrototype.Application.Rental.Interfaces;
 using RentingPrototype.Application.Rental.Commands;
 using RentingPrototype.Application.Rental.Queries;
+using RentingPrototype.Api.Endpoints.RentalHistory;
+using RentingPrototype.Application.RentalHistory.Interfaces;
+using RentingPrototype.Infrastructure.RentalHistory;
+using RentingPrototype.Application.RentalHistory.Queries.VehicleRentalHistory;
+using RentingPrototype.Application.RentalHistory.Queries.CustomerRentalHistory;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Create minimal DB schema
-string connectionString = CreateMinimalDbSchema();
+var (connectionString, inMemoryKeepAliveConnection) = CreateMinimalDbSchema();
 
 // Registering services
 builder.Services.AddSingleton<ISqliteConnectionFactory>(_ => new SqliteConnectionFactory(connectionString));
@@ -31,7 +36,7 @@ builder.Services.AddScoped<IVehicleCommandRepository, SqliteVehicleCommandReposi
 builder.Services.AddScoped<IVehicleQueryRepository, SqliteVehicleQueryRepository>();
 builder.Services.AddScoped<IRentalCommandRepository, SqliteRentalCommandRepository>();
 builder.Services.AddScoped<IRentalQueryRepository, SqliteRentalQueryRepository>();
-
+builder.Services.AddScoped<IRentalHistoryQueryRepository, SqliteRentalHistoryQueryRepository>();
 
 // Handlers scoped
 builder.Services.AddScoped<CreateVehicleHandler>();
@@ -43,14 +48,21 @@ builder.Services.AddScoped<CreateRentalHandler>();
 builder.Services.AddScoped<UpdateRentalHandler>();
 builder.Services.AddScoped<GetRentalByIdQueryHandler>();
 
-
+builder.Services.AddScoped<VehicleRentalHistoryQueryHandler>();
+builder.Services.AddScoped<CustomerRentalHistoryQueryHandler>();
 
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+if (inMemoryKeepAliveConnection is not null)
+{
+    app.Lifetime.ApplicationStopped.Register(() => inMemoryKeepAliveConnection.Dispose());
+}
+
 app.MapVehicleEndpoints();
 app.MapRentalsEndpoints();
+app.MapRentalHistoryEndpoints();
 
 app.MapOpenApi("/openapi/{documentname].json}");
 app.MapScalarApiReference(options =>
@@ -60,21 +72,45 @@ app.MapScalarApiReference(options =>
 
 app.Run();
 
-/// Creamos un esquema mínimo de base de datos
-/// siguiendo el esquema especificado en rentingprototype-schema.sql
-string CreateMinimalDbSchema()
+/// <summary>
+/// Creates the SQLite schema required by the application and returns the connection data.
+/// In testing environment this uses an in-memory database with a keep-alive connection.
+/// </summary>
+/// <returns>
+/// A tuple containing the connection string and an optional keep-alive connection.
+/// </returns>
+(string ConnectionString, SqliteConnection? InMemoryKeepAliveConnection) CreateMinimalDbSchema()
 {
-    string dbPath;
+    var schemaFile = Path.Combine(AppContext.BaseDirectory, "rentingprototype-schema.sql");
+    if (!File.Exists(schemaFile))
+        throw new FileNotFoundException($"Cannot create database. Schema not found at {schemaFile}");
+
+    var schemaSql = File.ReadAllText(schemaFile);
+
     if (builder.Environment.IsEnvironment("Testing"))
     {
-        dbPath = Path.Combine(Path.GetTempPath(), $"rentingprototype-{Guid.NewGuid():N}.db");
+        var inMemoryConnectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = $"rentingprototype-tests-{Guid.NewGuid():N}",
+            Mode = SqliteOpenMode.Memory,
+            Cache = SqliteCacheMode.Shared
+        }.ToString();
+
+        var keepAliveConnection = new SqliteConnection(inMemoryConnectionString);
+        keepAliveConnection.Open();
+
+        using (var command = keepAliveConnection.CreateCommand())
+        {
+            command.CommandText = schemaSql;
+            command.ExecuteNonQuery();
+        }
+
+        return (inMemoryConnectionString, keepAliveConnection);
     }
-    else
-    {
-        var dataDir = Path.Combine(builder.Environment.ContentRootPath, ".data");
-        Directory.CreateDirectory(dataDir);
-        dbPath = Path.Combine(dataDir, "rentingprototype.db");
-    }
+
+    var dataDir = Path.Combine(builder.Environment.ContentRootPath, ".data");
+    Directory.CreateDirectory(dataDir);
+    var dbPath = Path.Combine(dataDir, "rentingprototype.db");
 
     var cnnString = new SqliteConnectionStringBuilder
     {
@@ -84,11 +120,6 @@ string CreateMinimalDbSchema()
     if (!File.Exists(dbPath))
     {
         Console.WriteLine("Database not found. Creating new SQLite database...");
-        var schemaFile = Path.Combine(AppContext.BaseDirectory,
-            "rentingprototype-schema.sql");
-        if (!File.Exists(schemaFile)) throw new FileNotFoundException($"Cannot create database. Schema not found at {schemaFile}");
-
-        var schemaSql = File.ReadAllText(schemaFile);
         using var conn = new SqliteConnection(cnnString);
         conn.Open();
 
@@ -99,7 +130,7 @@ string CreateMinimalDbSchema()
         Console.WriteLine("Database created, seed initial data inserted.");
     }
 
-    return cnnString;
+    return (cnnString, null);
 }
 
 public partial class Program { }

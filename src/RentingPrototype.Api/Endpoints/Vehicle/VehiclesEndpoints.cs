@@ -1,4 +1,3 @@
-using Microsoft.Data.Sqlite;
 using RentingPrototype.Application.Vehicle.Commands;
 using RentingPrototype.Application.Vehicle.Queries;
 
@@ -6,35 +5,23 @@ namespace RentingPrototype.Api.Endpoints.Vehicle;
 
 public static class VehicleEndpoints
 {
+    /// <summary>
+    /// Registers vehicle endpoints.
+    /// </summary>
+    /// <param name="app">Application route builder.</param>
+    /// <returns>The configured route group.</returns>
     public static RouteGroupBuilder MapVehicleEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/vehicles").WithTags("Vehicles");
 
-        // TO-DO hacer que los endpoints de lectura sean tan elaborados como el de escritura, y crearlos en su propio método privado también
-
         // GET/vehicles/{id}
-        group.MapGet("/{id:guid}", async (Guid id, GetVehicleByIdQueryHandler handler, CancellationToken token)
-        =>
-        {
-            var vehicle = await handler.Handle(new VehicleQueryFilterDto(id), token);
-            return vehicle is null ? Results.NotFound() : Results.Ok(vehicle);
-        }).WithName("GetVehicleById");
+        group.MapGet("/{id:guid}", GetVehicleById).WithName("Get Vehicle By Id");
 
         // GET /vehicles
-        group.MapGet("/", async (GetAllVehiclesQueryHandler handler, CancellationToken token)
-        =>
-        {
-            var vehicles = await handler.Handle(new ListVehiclesQueryDto(), token);
-            return Results.Ok(vehicles);
-        }).WithName("GetAllVehicles");
+        group.MapGet("/", GetAllVehicles).WithName("Get All Vehicles");
 
         // GET /vehicles/available
-        group.MapGet("/available", async (GetAvailableVehiclesQueryHandler handler, CancellationToken token)
-        =>
-        {
-            var vehicles = await handler.Handle(new ListVehiclesQueryDto(), token);
-            return Results.Ok(vehicles);
-        }).WithName("GetAvailableVehicles");
+        group.MapGet("/available", GetAvailableVehicles).WithName("Get Available Vehicles");
 
         // POST 
         group.MapPost("/", CreateVehicle);
@@ -42,6 +29,50 @@ public static class VehicleEndpoints
         return group;
     }
 
+    /// <summary>
+    /// Gets a vehicle by identifier.
+    /// </summary>
+    /// <param name="id">Vehicle identifier.</param>
+    /// <param name="handler">Query handler.</param>
+    /// <param name="token">Cancellation token for the operation.</param>
+    /// <returns>HTTP result containing vehicle data or not found.</returns>
+    private static async Task<IResult> GetVehicleById(Guid id, GetVehicleByIdQueryHandler handler, CancellationToken token)
+    {
+        var vehicle = await handler.Handle(new VehicleQueryFilterDto(id), token);
+        return vehicle is null ? Results.NotFound() : Results.Ok(vehicle);
+    }
+
+    /// <summary>
+    /// Gets all registered vehicles.
+    /// </summary>
+    /// <param name="handler">Query handler.</param>
+    /// <param name="token">Cancellation token for the operation.</param>
+    /// <returns>HTTP result containing the vehicle collection.</returns>
+    private static async Task<IResult> GetAllVehicles(GetAllVehiclesQueryHandler handler, CancellationToken token)
+    {
+        var vehicles = await handler.Handle(new ListVehiclesQueryDto(), token);
+        return Results.Ok(vehicles);
+    }
+
+    /// <summary>
+    /// Gets vehicles currently available for renting.
+    /// </summary>
+    /// <param name="handler">Query handler.</param>
+    /// <param name="token">Cancellation token for the operation.</param>
+    /// <returns>HTTP result containing the available vehicle collection.</returns>
+    private static async Task<IResult> GetAvailableVehicles(GetAvailableVehiclesQueryHandler handler, CancellationToken token)
+    {
+        var vehicles = await handler.Handle(new ListVehiclesQueryDto(), token);
+        return Results.Ok(vehicles);
+    }
+
+    /// <summary>
+    /// Creates a new vehicle.
+    /// </summary>
+    /// <param name="request">Vehicle creation payload.</param>
+    /// <param name="handler">Command handler.</param>
+    /// <param name="token">Cancellation token for the operation.</param>
+    /// <returns>HTTP result representing creation outcome.</returns>
     private static async Task<IResult> CreateVehicle(
             CreateVehicleCommandDto request,
             CreateVehicleHandler handler,
@@ -62,9 +93,9 @@ public static class VehicleEndpoints
         {
             return Results.BadRequest(new { error = ex.Message });
         }
-        catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
+        catch (Exception ex) 
         {
-            return Results.Conflict(new { error = $"Constraint violation. {ex.Message}" });
+            return Results.InternalServerError(ex.Message);
         }
     }
 }

@@ -9,6 +9,7 @@ Permite:
 - Consultar vehículos (todos, por id y disponibles).
 - Iniciar un alquiler de vehículo (rent).
 - Cerrar un alquiler (return).
+- Consultar historial de alquileres por Vehículo y cliente.
 
 El sistema usa SQLite con datos semilla (vehículos, clientes e histórico de alquileres), lo que facilita probar el flujo sin configuración adicional de base de datos externa.
 
@@ -73,6 +74,8 @@ Con la API arrancada:
 - `POST /vehicles`
 - `POST /rentals/rent-vehicle`
 - `POST /rentals/return-vehicle`
+- `GET /vehicles/{id}/rental-history`
+- `GET /customers/{id}/rental-history`
 
 ### Ejemplos rápidos (curl)
 
@@ -131,32 +134,7 @@ Estado actual verificado:
 
 ## 4) TO-DO / futuros pasos
 
-1. Endurecer reglas de dominio de `Rental`:
-- Validar coherencia de fechas (`startDate <= endDate`).
-- Validar existencia de `customerId` y `vehicleId` antes de crear alquiler.
-
-2. Corregir y robustecer `UpdateRentalHandler`:
-- Manejar `rental == null` (actualmente puede provocar null reference).
-- Evitar actualizar alquileres ya cerrados sin regla explícita.
-
-3. Mejorar consistencia de contratos CQRS:
-- Usar DTO específico para `GetAvailableVehicles` (hoy reutiliza `ListVehiclesQueryDto`).
-
-4. Mejorar API y observabilidad:
-- Añadir validación de requests (FluentValidation o filtro equivalente).
-- Añadir middleware de manejo global de errores y problem details.
-- Añadir logging estructurado.
-
-5. Evolución de persistencia:
-- Añadir migraciones/versionado de esquema (actualmente script SQL plano).
-- Revisar estrategia de inicialización de base para producción.
-
-6. Completar cobertura de pruebas:
-- Casos de alquiler/retorno y errores de negocio.
-- Pruebas de concurrencia (doble alquiler del mismo vehículo/cliente).
-- Tests de integración para rutas de lectura y errores HTTP.
-
-7. Dockerización del proyecto (próximos pasos):
+1. Dockerización del proyecto (próximos pasos):
 - Crear un `Dockerfile` multi-stage para .NET 9:
 - Etapa build con `mcr.microsoft.com/dotnet/sdk:9.0` (restore/build/publish).
 - Etapa runtime con `mcr.microsoft.com/dotnet/aspnet:9.0` (imagen final ligera).

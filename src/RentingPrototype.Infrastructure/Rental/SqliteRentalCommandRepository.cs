@@ -9,11 +9,20 @@ public sealed class SqliteRentalCommandRepository : IRentalCommandRepository
 {
     private readonly SqliteUnitOfWork _uow;
 
+    /// <summary>
+    /// Creates a rental command repository bound to the active unit of work.
+    /// </summary>
+    /// <param name="uow">SQLite unit of work.</param>
     public SqliteRentalCommandRepository(SqliteUnitOfWork uow)
     {
         _uow = uow;
     }
 
+    /// <summary>
+    /// Inserts a new rental row inside the current unit-of-work transaction.
+    /// </summary>
+    /// <param name="rental">Rental aggregate to persist.</param>
+    /// <param name="token">Cancellation token for the operation.</param>
     public async Task CreateAsync(RentalDomain.Rental rental, CancellationToken token)
     {
         if (_uow.Connection is null || _uow.Transaction is null)
@@ -37,6 +46,11 @@ public sealed class SqliteRentalCommandRepository : IRentalCommandRepository
         await _uow.Connection.ExecuteAsync(cmd);
     }
 
+    /// <summary>
+    /// Updates an existing rental row inside the current unit-of-work transaction.
+    /// </summary>
+    /// <param name="rental">Rental aggregate with updated values.</param>
+    /// <param name="token">Cancellation token for the operation.</param>
     public async Task UpdateAsync(Domain.RentalDomain.Rental rental, CancellationToken token)
     {
         if (_uow.Connection is null || _uow.Transaction is null)

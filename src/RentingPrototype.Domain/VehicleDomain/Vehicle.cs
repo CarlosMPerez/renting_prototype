@@ -8,6 +8,9 @@ public sealed class Vehicle
     public string Model { get; }
     public DateTime ManufactureDateUtc { get; }
 
+    /// <summary>
+    /// Initializes a vehicle aggregate instance.
+    /// </summary>
     private Vehicle(Guid id, string licensePlate,
                     string brand, string model,
                     DateTime manufactureDateUtc)
@@ -19,6 +22,16 @@ public sealed class Vehicle
         ManufactureDateUtc = manufactureDateUtc;
     }
 
+    /// <summary>
+    /// Creates a vehicle aggregate enforcing the business constraints.
+    /// </summary>
+    /// <param name="id">Vehicle identifier.</param>
+    /// <param name="licensePlate">Vehicle license plate.</param>
+    /// <param name="brand">Vehicle brand.</param>
+    /// <param name="model">Vehicle model.</param>
+    /// <param name="manufactureDateUtc">Vehicle manufacture date in UTC.</param>
+    /// <param name="nowUtc">Current UTC date used to validate age rules.</param>
+    /// <returns>A valid <see cref="Vehicle"/> instance.</returns>
     public static Vehicle Create(Guid id, string licensePlate,
                                     string brand, string model,
                                     DateTime manufactureDateUtc,

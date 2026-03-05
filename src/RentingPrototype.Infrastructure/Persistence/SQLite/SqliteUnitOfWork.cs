@@ -11,11 +11,19 @@ public class SqliteUnitOfWork : IUnitOfWork
     public IDbConnection? Connection { get; private set; }
     public IDbTransaction? Transaction { get; private set; }
 
+    /// <summary>
+    /// Creates a unit-of-work instance backed by SQLite.
+    /// </summary>
+    /// <param name="factory">SQLite connection factory.</param>
     public SqliteUnitOfWork(ISqliteConnectionFactory factory)
     {
         _factory = factory;
     }
 
+    /// <summary>
+    /// Opens a connection and starts a transaction if one is not already active.
+    /// </summary>
+    /// <param name="token">Cancellation token for the operation.</param>
     public Task BeginAsync(CancellationToken token)
     {
         Connection ??= _factory.CreateConnection();
@@ -25,6 +33,10 @@ public class SqliteUnitOfWork : IUnitOfWork
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Commits the active transaction and disposes transactional resources.
+    /// </summary>
+    /// <param name="token">Cancellation token for the operation.</param>
     public Task CommitAsync(CancellationToken token)
     {
         Transaction?.Commit();
@@ -32,6 +44,10 @@ public class SqliteUnitOfWork : IUnitOfWork
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Rolls back the active transaction and disposes transactional resources.
+    /// </summary>
+    /// <param name="token">Cancellation token for the operation.</param>
     public Task RollbackAsync(CancellationToken token)
     {
         try
@@ -46,6 +62,9 @@ public class SqliteUnitOfWork : IUnitOfWork
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Disposes connection and transaction objects.
+    /// </summary>
     private void Cleanup()
     {
         Transaction?.Dispose();
