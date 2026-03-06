@@ -64,7 +64,7 @@ app.MapVehicleEndpoints();
 app.MapRentalsEndpoints();
 app.MapRentalHistoryEndpoints();
 
-app.MapOpenApi("/openapi/{documentname].json}");
+app.MapOpenApi("/openapi/{documentName}.json");
 app.MapScalarApiReference(options =>
 {
     options.WithTitle("Renting Prototype API");

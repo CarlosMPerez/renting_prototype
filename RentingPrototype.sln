@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.UnitTests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.IntegrationTests", "test\RentingPrototype.IntegrationTests\RentingPrototype.IntegrationTests.csproj", "{DD4D53E1-5EF6-4834-84CF-286C4A9EA984}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.HostTests", "test\RentingPrototype.HostTests\RentingPrototype.HostTests.csproj", "{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,6 +54,10 @@ Global
 		{DD4D53E1-5EF6-4834-84CF-286C4A9EA984}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD4D53E1-5EF6-4834-84CF-286C4A9EA984}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD4D53E1-5EF6-4834-84CF-286C4A9EA984}.Release|Any CPU.Build.0 = Release|Any CPU
+		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5A86E98E-E9AB-4192-AA54-F92B3A397E89} = {9619AB63-1416-46CF-AC3E-775567914317}
@@ -60,5 +66,6 @@ Global
 		{21A53DFE-B839-4E93-B6C1-49E9D30F9631} = {9619AB63-1416-46CF-AC3E-775567914317}
 		{BBCDD867-DB6D-4BB7-87E4-EA38F58CB33A} = {056A85C6-9886-4600-B7C2-204014FACBB3}
 		{DD4D53E1-5EF6-4834-84CF-286C4A9EA984} = {056A85C6-9886-4600-B7C2-204014FACBB3}
+		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258} = {056A85C6-9886-4600-B7C2-204014FACBB3}
 	EndGlobalSection
 EndGlobal
