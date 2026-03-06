@@ -108,7 +108,7 @@ app.Run();
         return (inMemoryConnectionString, keepAliveConnection);
     }
 
-    var dataDir = Path.Combine(builder.Environment.ContentRootPath, ".data");
+    var dataDir = Path.Combine(builder.Environment.ContentRootPath, "data");
     Directory.CreateDirectory(dataDir);
     var dbPath = Path.Combine(dataDir, "rentingprototype.db");
 
@@ -129,6 +129,8 @@ app.Run();
 
         Console.WriteLine("Database created, seed initial data inserted.");
     }
+
+    Console.WriteLine(cnnString);
 
     return (cnnString, null);
 }
