@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11520.95 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9619AB63-1416-46CF-AC3E-775567914317}"
 EndProject
@@ -21,13 +21,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.Integratio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.HostTests", "test\RentingPrototype.HostTests\RentingPrototype.HostTests.csproj", "{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ED88D5D6-1DAA-4135-A313-4AB9E48C22C1}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+		Dockerfile = Dockerfile
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{5A86E98E-E9AB-4192-AA54-F92B3A397E89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -59,6 +63,9 @@ Global
 		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{5A86E98E-E9AB-4192-AA54-F92B3A397E89} = {9619AB63-1416-46CF-AC3E-775567914317}
 		{0D6630B2-61B5-44E8-8799-42B5F43E985E} = {9619AB63-1416-46CF-AC3E-775567914317}
@@ -67,5 +74,8 @@ Global
 		{BBCDD867-DB6D-4BB7-87E4-EA38F58CB33A} = {056A85C6-9886-4600-B7C2-204014FACBB3}
 		{DD4D53E1-5EF6-4834-84CF-286C4A9EA984} = {056A85C6-9886-4600-B7C2-204014FACBB3}
 		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258} = {056A85C6-9886-4600-B7C2-204014FACBB3}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {33B34040-321E-49F1-8513-4AC868888AE4}
 	EndGlobalSection
 EndGlobal

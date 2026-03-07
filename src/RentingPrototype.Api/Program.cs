@@ -70,6 +70,9 @@ app.MapScalarApiReference(options =>
     options.WithTitle("Renting Prototype API");
 });
 
+// Redirect root to Scalar API ref.
+app.MapGet("/", () => Results.Redirect("/scalar"));
+
 app.Run();
 
 /// <summary>

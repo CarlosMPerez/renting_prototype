@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  renting-api:
+    container_name: rentingprototype
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
