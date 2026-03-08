@@ -336,16 +336,16 @@ Trade-off actual:
 6. SQLite en contenedor sin volumen
 - Riesgo de perdida de estado al recrear contenedor.
 
-7. Dos soluciones en repo
-- RentingPrototype.sln (completa) y src/src.sln (parcial, no tracked actualmente).
-- Conviene definir una unica entrada para reducir confusion.
-
 ============================================================
 13) COMO EXPLICAR LA ARQUITECTURA EN 2-3 MINUTOS
 ============================================================
 
 Guion corto sugerido:
-"La solucion esta separada en cuatro capas. Domain contiene reglas puras de negocio, Application implementa casos de uso con CQRS ligero, Infrastructure implementa persistencia con SQLite y Dapper, y Api expone endpoints Minimal API y compone dependencias por DI. Para operaciones de escritura usamos Unit of Work transaccional. La consistencia se protege en dos niveles: validaciones en dominio/aplicacion y constraints en base de datos. Tenemos tres niveles de tests: unitarios para reglas, integracion para flujos HTTP y host tests para composicion del sistema. La dockerizacion es multi-stage y compatible con Visual Studio mediante perfil Docker, con compose para levantar rapido el servicio." 
+"La solucion esta separada en cuatro capas. Domain contiene reglas puras de negocio, Application implementa casos de uso con CQRS ligero, 
+Infrastructure implementa persistencia con SQLite y Dapper, y Api expone endpoints Minimal API y compone dependencias por DI. Para operaciones 
+de escritura usamos Unit of Work transaccional. La consistencia se protege en dos niveles: validaciones en dominio/aplicacion y constraints en 
+base de datos. Tenemos tres niveles de tests: unitarios para reglas, integracion para flujos HTTP y host tests para composicion del sistema. 
+La dockerizacion es multi-stage y compatible con Visual Studio mediante perfil Docker, con compose para levantar rapido el servicio." 
 
 ============================================================
 14) PREGUNTAS PROBABLES EN ENTREVISTA Y RESPUESTA CORTA
@@ -394,4 +394,7 @@ Desde /home/carlos/work/renting_prototype:
 16) RESUMEN EJECUTIVO
 ============================================================
 
-Es un proyecto bien estructurado para una prueba tecnica: arquitectura por capas limpia, CQRS ligero, reglas de negocio claras en dominio, persistencia SQL controlada con Dapper, y testing robusto en tres niveles. La dockerizacion esta correctamente implementada con multi-stage + compose + perfil Docker de Visual Studio. En entrevista, el mejor enfoque es destacar la intencionalidad del diseno y demostrar que conoces tanto sus fortalezas como sus trade-offs y mejoras naturales hacia produccion.
+Es un proyecto bien estructurado para una prueba tecnica: arquitectura por capas limpia, CQRS ligero, reglas de negocio claras en dominio, 
+persistencia SQL controlada con Dapper, y testing robusto en tres niveles. La dockerizacion esta correctamente implementada con 
+multi-stage + compose + perfil Docker de Visual Studio. En entrevista, el mejor enfoque es destacar la intencionalidad del diseno y demostrar 
+que conoces tanto sus fortalezas como sus trade-offs y mejoras naturales hacia produccion.
