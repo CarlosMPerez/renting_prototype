@@ -1,83 +1,96 @@
-# RentingPrototype - Guía técnica (src)
+# RentingPrototype - Guía técnica
 
 ## 1) ¿Qué hace este proyecto?
 
-`RentingPrototype` es una API REST (Minimal API en .NET 9) para un prototipo de renting de vehículos.
+`RentingPrototype` es una API REST construida con Minimal API en .NET 9 para un prototipo de renting de vehículos.
 
 Permite:
 - Registrar vehículos.
 - Consultar vehículos (todos, por id y disponibles).
-- Iniciar un alquiler de vehículo (rent).
-- Cerrar un alquiler (return).
-- Consultar historial de alquileres por Vehículo y cliente.
+- Iniciar un alquiler (`rent`).
+- Cerrar un alquiler (`return`).
+- Consultar historial de alquileres por vehículo y por cliente.
 
-El sistema usa SQLite con datos semilla (vehículos, clientes e histórico de alquileres), lo que facilita probar el flujo sin configuración adicional de base de datos externa.
+La persistencia usa SQLite con datos semilla, por lo que el proyecto puede ejecutarse sin infraestructura externa.
 
-## 2) ¿Cómo lo hace? (arquitectura y patrones)
+## 2) Arquitectura y patrones
 
-El proyecto está organizado en capas:
+La solución está separada en capas:
 
-- `RentingPrototype.Api`
-  - Exposición HTTP con Minimal APIs.
-  - Endpoints en `Endpoints/Vehicle` y `Endpoints/Rental`.
-  - Configuración de DI, OpenAPI y Scalar en `Program.cs`.
+- `src/RentingPrototype.Api`
+  - Endpoints HTTP (Minimal API), DI, OpenAPI y Scalar.
+- `src/RentingPrototype.Application`
+  - Casos de uso (handlers), DTOs y contratos.
+- `src/RentingPrototype.Domain`
+  - Entidades (`Vehicle`, `Rental`) y reglas de negocio.
+- `src/RentingPrototype.Infrastructure`
+  - Persistencia SQLite + Dapper, repositorios y Unit of Work.
 
-- `RentingPrototype.Application`
-  - Casos de uso con handlers (`CreateVehicleHandler`, `CreateRentalHandler`, `UpdateRentalHandler`, etc.).
-  - Contratos/abstracciones (`IUnitOfWork`, repositorios command/query).
-  - DTOs de entrada y salida.
+Patrones aplicados:
+- Arquitectura por capas.
+- CQRS ligero (lectura/escritura separadas).
+- Repository pattern.
+- Unit of Work transaccional en comandos.
 
-- `RentingPrototype.Domain`
-  - Entidades de dominio (`Vehicle`, `Rental`) y reglas de negocio.
-  - Ejemplo: un vehículo no puede registrarse si tiene más de 5 años.
-
-- `RentingPrototype.Infrastructure`
-  - Implementaciones de persistencia con SQLite + Dapper.
-  - Repositorios SQL para comandos y consultas.
-  - `SqliteUnitOfWork` para transacciones por caso de uso.
-  - Script de esquema y seed: `rentingprototype-schema.sql`.
-
-Patrones aplicados actualmente:
-- Arquitectura por capas (separación de responsabilidades).
-- CQRS ligero (handlers y repositorios separados para lectura/escritura).
-- Repository pattern (acceso a datos desacoplado de aplicación).
-- Unit of Work (begin/commit/rollback en casos de escritura).
-
-## 3) Puesta en marcha y pruebas (incluyendo Scalar)
+## 3) Arranque local
 
 ### Requisitos
 - .NET SDK 9.0
 
-### Arranque local
-Desde la raíz del repo:
+### Ejecutar API
+Desde la raíz:
 
 ```bash
-dotnet restore
+dotnet restore RentingPrototype.sln
 dotnet run --project src/RentingPrototype.Api
 ```
 
-La API arranca, crea automáticamente la base SQLite si no existe y carga schema + seed.
-
-Con `launchSettings.json`, en desarrollo expone por defecto:
+En modo desarrollo expone por defecto:
 - `http://localhost:5062`
 
-### Documentación OpenAPI y Scalar
-Con la API arrancada:
+Base de datos local:
+- Se crea automáticamente en `data/rentingprototype.db` si no existe.
+- El esquema y seed se cargan desde `src/RentingPrototype.Infrastructure/Persistence/Schema/rentingprototype-schema.sql`.
+
+### OpenAPI y Scalar
 - OpenAPI JSON: `http://localhost:5062/openapi/v1.json`
 - Scalar UI: `http://localhost:5062/scalar/v1`
-  - También responde `http://localhost:5062/scalar/`.
+- La ruta raíz `/` redirige a `/scalar`.
 
-### Endpoints principales
+## 4) Dockerización (TO-DO completado)
+
+La dockerización está implementada y funcional.
+
+Incluye:
+- `Dockerfile` multi-stage con:
+  - Build: `mcr.microsoft.com/dotnet/sdk:9.0`
+  - Runtime: `mcr.microsoft.com/dotnet/aspnet:9.0`
+- Exposición de puerto `8080`.
+- Variables de entorno (`ASPNETCORE_URLS`, `ASPNETCORE_ENVIRONMENT`).
+- `docker-compose.yml` con servicio `renting-api` (`8080:8080`).
+- Perfil de Visual Studio: `Container (Dockerfile)` en `launchSettings.json`.
+- `.dockerignore` configurado para excluir artefactos innecesarios de build.
+
+Comandos útiles:
+
+```bash
+docker build -t rentingprototype:local .
+docker run --rm -p 8080:8080 rentingprototype:local
+docker compose up --build
+```
+
+## 5) Endpoints principales
+
 - `GET /vehicles/{id}`
-- `GET /vehicles`
+- `GET /vehicles/`
 - `GET /vehicles/available`
-- `POST /vehicles`
+- `POST /vehicles/`
 - `POST /rentals/rent-vehicle`
 - `POST /rentals/return-vehicle`
-- `GET /vehicles/{id}/rental-history`
-- `GET /customers/{id}/rental-history`
+- `GET /rentalhistory/vehicles/{id}/rental-history`
+- `GET /rentalhistory/customers/{id}/rental-history`
 
-### Ejemplos rápidos (curl)
+## 6) Ejemplos rápidos (curl)
 
 Crear vehículo:
 
@@ -121,31 +134,25 @@ curl -X POST http://localhost:5062/rentals/return-vehicle \
   }'
 ```
 
-### Tests
+## 7) Tests
+
 Desde raíz:
 
 ```bash
 dotnet test RentingPrototype.sln
 ```
 
-Estado actual verificado:
-- Unit tests: 16 OK
-- Integration tests: 1 OK
+Estado verificado el **2026-03-08**:
+- Unit tests: **34/34 OK**
+- Integration tests: **14/14 OK**
+- Host tests: **5/5 OK**
+- Total: **53/53 OK**
 
-## 4) TO-DO / futuros pasos
+## 8) Propuestas de mejora
 
-1. Dockerización del proyecto (próximos pasos):
-- Crear un `Dockerfile` multi-stage para .NET 9:
-- Etapa build con `mcr.microsoft.com/dotnet/sdk:9.0` (restore/build/publish).
-- Etapa runtime con `mcr.microsoft.com/dotnet/aspnet:9.0` (imagen final ligera).
-- Incluir únicamente los artefactos publicados y las dependencias necesarias para ejecutar la API.
-- Añadir soporte de Visual Studio para ejecutar en contenedor:
-- Incluir perfil Docker en `launchSettings.json` (o añadir soporte con los artefactos estándar de contenedor de VS).
-- Añadir/ajustar `.dockerignore` para excluir `bin/`, `obj/`, `.git/`, `.vs/`, `.data/` y otros ficheros no necesarios.
-- Configuración adicional de contenedor:
-- Exponer el puerto de la API (por ejemplo `8080` en contenedor y mapeo a `5062` en host).
-- Definir variables de entorno requeridas (por ejemplo `ASPNETCORE_URLS` y `ASPNETCORE_ENVIRONMENT`).
-- Valorar volumen para persistir la base SQLite fuera del contenedor (`/app/.data`).
-- Verificar funcionamiento en ambos escenarios:
-- Ejecución local sin contenedor (`dotnet run`).
-- Ejecución en contenedor (`docker build` + `docker run`) validando endpoints y Scalar.
+1. Añadir middleware global de excepciones y `ProblemDetails` para unificar respuestas de error.
+2. Añadir autenticación/autorización (por ejemplo JWT + políticas por rol).
+3. Mejorar observabilidad con logging estructurado, métricas y trazas distribuidas.
+4. Añadir persistencia de SQLite en Docker mediante volumen para evitar pérdida de datos al recrear contenedor.
+5. Capturar y traducir de forma explícita violaciones de constraints de base de datos en errores de dominio.
+6. Introducir migraciones versionadas y preparar el salto a PostgreSQL/SQL Server para escenarios de producción.
