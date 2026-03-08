@@ -57,7 +57,7 @@ Base de datos local:
 - Scalar UI: `http://localhost:5062/scalar/v1`
 - La ruta raíz `/` redirige a `/scalar`.
 
-## 4) Dockerización (TO-DO completado)
+## 4) Dockerización
 
 La dockerización está implementada y funcional.
 
