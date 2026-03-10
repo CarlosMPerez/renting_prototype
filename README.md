@@ -142,17 +142,11 @@ Desde raíz:
 dotnet test RentingPrototype.sln
 ```
 
-Estado verificado el **2026-03-08**:
-- Unit tests: **34/34 OK**
-- Integration tests: **14/14 OK**
-- Host tests: **5/5 OK**
-- Total: **53/53 OK**
-
 ## 8) Propuestas de mejora (por evaluador - se incluye estado de las mismas)
 
 1. Introducir ValueObjects:
   - Introducidos a modo de ejemplo ValueObjects para las propiedades VehicleId, LicensePlate y ManufactureDate de Vehicle.
-  - Refactorizados hyandler, repos y tests.
+  - Refactorizados handler, repos y tests.
   - Terminado 2026-03-10
 2. Introducir DomainEvents
 3. Mejora de arquitectura hexagonal
