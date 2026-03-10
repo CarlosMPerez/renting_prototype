@@ -1,4 +1,4 @@
-using RentingPrototype.Application.Rental.Interfaces;
+using RentingPrototype.Application.Rental.Ports;
 using RentalDomain = RentingPrototype.Domain.RentalDomain;
 
 namespace RentingPrototype.UnitTests.TestDoubles;

@@ -1,6 +1,6 @@
 using RentalDomain = RentingPrototype.Domain.RentalDomain;
 
-namespace RentingPrototype.Application.Rental.Interfaces;
+namespace RentingPrototype.Application.Rental.Ports;
 
 public interface IRentalCommandRepository
 {

@@ -1,5 +1,5 @@
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Vehicle.Interfaces;
+using RentingPrototype.Application.Vehicle.Ports;
 
 namespace RentingPrototype.Application.Vehicle.Queries;
 

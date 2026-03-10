@@ -1,9 +1,9 @@
 using Dapper;
-using RentingPrototype.Application.Rental.Interfaces;
+using RentingPrototype.Application.Rental.Ports;
 using RentingPrototype.Application.Rental.Queries;
 using RentingPrototype.Infrastructure.Persistence.Sqlite;
 
-namespace RentingPrototype.Infrastructure.Rental;
+namespace RentingPrototype.Infrastructure.Rental.Adapters;
 
 public sealed class SqliteRentalQueryRepository : IRentalQueryRepository
 {

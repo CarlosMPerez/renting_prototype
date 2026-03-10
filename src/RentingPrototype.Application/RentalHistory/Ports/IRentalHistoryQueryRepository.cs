@@ -1,7 +1,7 @@
 using RentingPrototype.Application.RentalHistory.Queries.CustomerRentalHistory;
 using RentingPrototype.Application.RentalHistory.Queries.VehicleRentalHistory;
 
-namespace RentingPrototype.Application.RentalHistory.Interfaces;
+namespace RentingPrototype.Application.RentalHistory.Ports;
 
 public interface IRentalHistoryQueryRepository
 {

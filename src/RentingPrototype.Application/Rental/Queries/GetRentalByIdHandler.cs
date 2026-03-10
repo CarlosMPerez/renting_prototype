@@ -1,5 +1,5 @@
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Rental.Interfaces;
+using RentingPrototype.Application.Rental.Ports;
 
 namespace RentingPrototype.Application.Rental.Queries;
 

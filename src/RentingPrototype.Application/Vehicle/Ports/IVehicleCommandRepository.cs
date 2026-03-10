@@ -1,6 +1,6 @@
 using VehicleDomain = RentingPrototype.Domain.VehicleDomain;
 
-namespace RentingPrototype.Application.Vehicle.Interfaces;
+namespace RentingPrototype.Application.Vehicle.Ports;
 
 public interface IVehicleCommandRepository
 {

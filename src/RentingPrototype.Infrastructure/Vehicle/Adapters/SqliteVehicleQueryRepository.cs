@@ -1,9 +1,9 @@
 using Dapper;
-using RentingPrototype.Application.Vehicle.Interfaces;
+using RentingPrototype.Application.Vehicle.Ports;
 using RentingPrototype.Application.Vehicle.Queries;
 using RentingPrototype.Infrastructure.Persistence.Sqlite;
 
-namespace RentingPrototype.Infrastructure.Vehicle;
+namespace RentingPrototype.Infrastructure.Vehicle.Adapters;
 
 public sealed class SqliteVehicleQueryRepository : IVehicleQueryRepository
 {

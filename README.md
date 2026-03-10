@@ -148,11 +148,14 @@ Estado verificado el **2026-03-08**:
 - Host tests: **5/5 OK**
 - Total: **53/53 OK**
 
-## 8) Propuestas de mejora
+## 8) Propuestas de mejora (por evaluador - se incluye estado de las mismas)
 
-1. Añadir middleware global de excepciones y `ProblemDetails` para unificar respuestas de error.
-2. Añadir autenticación/autorización (por ejemplo JWT + políticas por rol).
-3. Mejorar observabilidad con logging estructurado, métricas y trazas distribuidas.
-4. Añadir persistencia de SQLite en Docker mediante volumen para evitar pérdida de datos al recrear contenedor.
-5. Capturar y traducir de forma explícita violaciones de constraints de base de datos en errores de dominio.
-6. Introducir migraciones versionadas y preparar el salto a PostgreSQL/SQL Server para escenarios de producción.
+1. Introducir ValueObjects:
+  - Introducidos a modo de ejemplo ValueObjects para las propiedades VehicleId, LicensePlate y ManufactureDate de Vehicle.
+  - Refactorizados hyandler, repos y tests.
+  - Terminado 2026-03-10
+2. Introducir DomainEvents
+3. Mejora de arquitectura hexagonal
+4. Mejora del manejo de excepciones
+5. Añadir observabilidad
+6. Añadir logging estructurado

@@ -1,6 +1,6 @@
 using RentingPrototype.Application.Rental.Queries;
 
-namespace RentingPrototype.Application.Rental.Interfaces;
+namespace RentingPrototype.Application.Rental.Ports;
 
 public interface IRentalQueryRepository
 {

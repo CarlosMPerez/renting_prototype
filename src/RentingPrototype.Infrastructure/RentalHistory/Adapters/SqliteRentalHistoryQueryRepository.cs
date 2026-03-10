@@ -1,10 +1,10 @@
 using Dapper;
-using RentingPrototype.Application.RentalHistory.Interfaces;
+using RentingPrototype.Application.RentalHistory.Ports;
 using RentingPrototype.Application.RentalHistory.Queries.CustomerRentalHistory;
 using RentingPrototype.Application.RentalHistory.Queries.VehicleRentalHistory;
 using RentingPrototype.Infrastructure.Persistence.Sqlite;
 
-namespace RentingPrototype.Infrastructure.RentalHistory;
+namespace RentingPrototype.Infrastructure.RentalHistory.Adapters;
 
 public class SqliteRentalHistoryQueryRepository : IRentalHistoryQueryRepository
 {

@@ -1,4 +1,4 @@
-using RentingPrototype.Application.Vehicle.Interfaces;
+using RentingPrototype.Application.Vehicle.Ports;
 using RentingPrototype.Domain.VehicleDomain;
 
 namespace RentingPrototype.UnitTests.TestDoubles;

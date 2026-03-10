@@ -2,9 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Rental.Interfaces;
-using RentingPrototype.Application.RentalHistory.Interfaces;
-using RentingPrototype.Application.Vehicle.Interfaces;
+using RentingPrototype.Application.Rental.Ports;
+using RentingPrototype.Application.RentalHistory.Ports;
+using RentingPrototype.Application.Vehicle.Ports;
 using RentingPrototype.Infrastructure.Persistence.Sqlite;
 using RentingPrototype.Infrastructure.Persistence.SQLite;
 

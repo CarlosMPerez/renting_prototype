@@ -1,5 +1,5 @@
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Vehicle.Interfaces;
+using RentingPrototype.Application.Vehicle.Ports;
 using VehicleDomain = RentingPrototype.Domain.VehicleDomain;
 
 namespace RentingPrototype.Application.Vehicle.Commands;
@@ -44,7 +44,7 @@ public sealed class CreateVehicleHandler
         {
             await _repo.AddAsync(vehicle, token);
             await _uow.CommitAsync(token);
-            return new CreateVehicleResultDto(vehicle.Id);
+            return new CreateVehicleResultDto(vehicle.Id.Value);
         }
         catch
         {

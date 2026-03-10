@@ -1,5 +1,5 @@
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Rental.Interfaces;
+using RentingPrototype.Application.Rental.Ports;
 using RentalDomain = RentingPrototype.Domain.RentalDomain;
 
 namespace RentingPrototype.Application.Rental.Commands;
@@ -37,7 +37,7 @@ public sealed class UpdateRentalHandler
         await _uow.BeginAsync(token);
         try
         {
-            var rental = await _queryRepo.GetByIdAsync(dto.Id, token) 
+            var rental = await _queryRepo.GetByIdAsync(dto.Id, token)
                 ?? throw new KeyNotFoundException($"Rental '{dto.Id}' not found.");
 
             await _commandRepo.UpdateAsync(RentalDomain.Rental.Create(

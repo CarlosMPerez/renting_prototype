@@ -1,9 +1,9 @@
 using Dapper;
-using RentingPrototype.Application.Rental.Interfaces;
+using RentingPrototype.Application.Rental.Ports;
 using RentingPrototype.Infrastructure.Persistence.SQLite;
 using RentalDomain = RentingPrototype.Domain.RentalDomain;
 
-namespace RentingPrototype.Infrastructure.Rental;
+namespace RentingPrototype.Infrastructure.Rental.Adapters;
 
 public sealed class SqliteRentalCommandRepository : IRentalCommandRepository
 {

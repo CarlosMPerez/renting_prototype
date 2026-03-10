@@ -35,10 +35,10 @@ public class VehicleTests
             manufactureDateUtc: manufactureDate,
             nowUtc: DateTime.UtcNow);
 
-        Assert.Equal("1234-ABC", v.LicensePlate);
+        Assert.Equal("1234-ABC", v.LicensePlate.Value);
         Assert.Equal("Toyota", v.Brand);
         Assert.Equal("Corolla", v.Model);
-        Assert.Equal(manufactureDate, v.ManufactureDateUtc);
+        Assert.Equal(DateOnly.FromDateTime(manufactureDate), v.ManufactureDateUtc.Value);
     }
 
     [Theory]
@@ -67,7 +67,7 @@ public class VehicleTests
             manufactureDateUtc: DateTime.UtcNow.AddYears(-3),
             nowUtc: DateTime.UtcNow);
 
-        Assert.Equal("1234-ABC", v.LicensePlate);
+        Assert.Equal("1234-ABC", v.LicensePlate.Value);
         Assert.Equal("Toyota", v.Brand);
         Assert.Equal("Corolla", v.Model);
     }

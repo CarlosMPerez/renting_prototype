@@ -1,5 +1,5 @@
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.RentalHistory.Interfaces;
+using RentingPrototype.Application.RentalHistory.Ports;
 
 namespace RentingPrototype.Application.RentalHistory.Queries.VehicleRentalHistory;
 
@@ -20,6 +20,6 @@ public sealed class VehicleRentalHistoryQueryHandler : IQueryHandler<VehicleRent
     /// <param name="query">Vehicle rental history filter.</param>
     /// <param name="token">Cancellation token for the operation.</param>
     /// <returns>History rows containing customer and rental period data.</returns>
-    public Task<IReadOnlyList<VehicleRentalHistoryResultDto>?> Handle(VehicleRentalHistoryFilterDto query, CancellationToken token) 
+    public Task<IReadOnlyList<VehicleRentalHistoryResultDto>?> Handle(VehicleRentalHistoryFilterDto query, CancellationToken token)
         => _repo.GetByVehicleIdAsync(query.vehicleId, token);
 }

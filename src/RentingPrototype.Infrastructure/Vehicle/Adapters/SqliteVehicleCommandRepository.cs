@@ -1,9 +1,9 @@
 using Dapper;
-using RentingPrototype.Application.Vehicle.Interfaces;
+using RentingPrototype.Application.Vehicle.Ports;
 using VehicleDomain = RentingPrototype.Domain.VehicleDomain;
 using RentingPrototype.Infrastructure.Persistence.SQLite;
 
-namespace RentingPrototype.Infrastructure.Vehicle;
+namespace RentingPrototype.Infrastructure.Vehicle.Adapters;
 
 public sealed class SqliteVehicleCommandRepository : IVehicleCommandRepository
 {
@@ -37,11 +37,11 @@ public sealed class SqliteVehicleCommandRepository : IVehicleCommandRepository
         var cmd = new CommandDefinition(sql,
             new
             {
-                Id = vehicle.Id.ToString("D"),
-                vehicle.LicensePlate,
-                vehicle.Brand,
-                vehicle.Model,
-                ManufactureDate = vehicle.ManufactureDateUtc.ToString("O")
+                Id = vehicle.Id.ToString(),
+                LicensePlate = vehicle.LicensePlate.Value,
+                Brand = vehicle.Brand,
+                Model = vehicle.Model,
+                ManufactureDate = vehicle.ManufactureDateUtc.ToString()
             }, transaction: _uow.Transaction, cancellationToken: token);
 
         await _uow.Connection.ExecuteAsync(cmd);

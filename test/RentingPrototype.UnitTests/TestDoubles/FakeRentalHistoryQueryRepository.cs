@@ -1,4 +1,4 @@
-using RentingPrototype.Application.RentalHistory.Interfaces;
+using RentingPrototype.Application.RentalHistory.Ports;
 using RentingPrototype.Application.RentalHistory.Queries.CustomerRentalHistory;
 using RentingPrototype.Application.RentalHistory.Queries.VehicleRentalHistory;
 

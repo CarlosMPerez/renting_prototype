@@ -1,4 +1,4 @@
-using RentingPrototype.Application.Rental.Interfaces;
+using RentingPrototype.Application.Rental.Ports;
 using RentingPrototype.Application.Rental.Queries;
 
 namespace RentingPrototype.UnitTests.TestDoubles;

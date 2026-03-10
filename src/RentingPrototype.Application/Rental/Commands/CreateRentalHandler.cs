@@ -1,5 +1,5 @@
 using RentingPrototype.Application.Abstractions;
-using RentingPrototype.Application.Rental.Interfaces;
+using RentingPrototype.Application.Rental.Ports;
 using RentalDomain = RentingPrototype.Domain.RentalDomain;
 
 namespace RentingPrototype.Application.Rental.Commands;
