@@ -1,4 +1,5 @@
 ﻿using RentingPrototype.Domain.VehicleDomain;
+using RentingPrototype.Domain.VehicleDomain.Events;
 
 namespace RentingPrototype.UnitTests.VehicleTesting;
 
@@ -26,6 +27,7 @@ public class VehicleTests
     public void Create_AllowsVehicleExactly5YearsOld()
     {
         var manufactureDate = DateTime.UtcNow.AddYears(-5); // borderline OK
+        var nowUtc = DateTime.UtcNow;
 
         var v = Vehicle.Create(
             id: Guid.NewGuid(),
@@ -33,12 +35,33 @@ public class VehicleTests
             brand: "Toyota",
             model: "Corolla",
             manufactureDateUtc: manufactureDate,
-            nowUtc: DateTime.UtcNow);
+            nowUtc: nowUtc);
 
         Assert.Equal("1234-ABC", v.LicensePlate.Value);
         Assert.Equal("Toyota", v.Brand);
         Assert.Equal("Corolla", v.Model);
         Assert.Equal(DateOnly.FromDateTime(manufactureDate), v.ManufactureDateUtc.Value);
+        var domainEvent = Assert.Single(v.DomainEvents);
+        var createdEvent = Assert.IsType<VehicleCreatedDomainEvent>(domainEvent);
+        Assert.Equal(v.Id, createdEvent.VehicleId);
+        Assert.Equal(v.LicensePlate.Value, createdEvent.LicensePlate);
+    }
+
+    [Fact]
+    public void Create_PullDomainEvents_EmptiesEventBuffer()
+    {
+        var vehicle = Vehicle.Create(
+            id: Guid.NewGuid(),
+            licensePlate: "1234-EVT",
+            brand: "Toyota",
+            model: "Corolla",
+            manufactureDateUtc: DateTime.UtcNow.AddYears(-3),
+            nowUtc: DateTime.UtcNow);
+
+        var pulled = vehicle.PullDomainEvents();
+
+        Assert.Single(pulled);
+        Assert.Empty(vehicle.DomainEvents);
     }
 
     [Theory]

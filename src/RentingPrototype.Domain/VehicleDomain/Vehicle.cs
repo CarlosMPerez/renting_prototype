@@ -1,8 +1,10 @@
+using RentingPrototype.Domain.Common;
+using RentingPrototype.Domain.VehicleDomain.Events;
 using RentingPrototype.Domain.VehicleDomain.ValueObjects;
 
 namespace RentingPrototype.Domain.VehicleDomain;
 
-public sealed class Vehicle
+public sealed class Vehicle : AggregateRoot
 {
     public VehicleId Id { get; private set; }
     public LicensePlate LicensePlate { get; private set; }
@@ -45,11 +47,18 @@ public sealed class Vehicle
         if (string.IsNullOrWhiteSpace(model)) throw new ArgumentException("Model is required.", nameof(model));
         if (model.Length > 100) throw new ArgumentException("Model max length is 100.", nameof(model));
 
-        return new Vehicle(
+        var vehicle = new Vehicle(
             VehicleId.From(id),
             LicensePlate.Create(licensePlate),
             brand.Trim(),
             model.Trim(),
             ManufactureDateOnly.Create(manufactureDateUtc, nowUtc));
+
+        vehicle.AddDomainEvent(new VehicleCreatedDomainEvent(
+            vehicle.Id,
+            vehicle.LicensePlate.Value,
+            nowUtc));
+
+        return vehicle;
     }
 }

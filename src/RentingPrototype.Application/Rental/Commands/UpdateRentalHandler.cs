@@ -12,6 +12,7 @@ public sealed class UpdateRentalHandler
     private readonly IRentalQueryRepository _queryRepo;
 
     private readonly IUnitOfWork _uow;
+    private readonly IDomainEventDispatcher _domainEventDispatcher;
 
     /// <summary>
     /// Creates a handler instance for rental updates.
@@ -19,11 +20,17 @@ public sealed class UpdateRentalHandler
     /// <param name="commandRepo">Rental command repository.</param>
     /// <param name="queryRepo">Rental query repository.</param>
     /// <param name="uow">Unit of work.</param>
-    public UpdateRentalHandler(IRentalCommandRepository commandRepo, IRentalQueryRepository queryRepo, IUnitOfWork uow)
+    /// <param name="domainEventDispatcher">Domain event dispatcher.</param>
+    public UpdateRentalHandler(
+        IRentalCommandRepository commandRepo,
+        IRentalQueryRepository queryRepo,
+        IUnitOfWork uow,
+        IDomainEventDispatcher domainEventDispatcher)
     {
         _commandRepo = commandRepo;
         _queryRepo = queryRepo;
         _uow = uow;
+        _domainEventDispatcher = domainEventDispatcher;
     }
 
     /// <summary>
@@ -40,13 +47,18 @@ public sealed class UpdateRentalHandler
             var rental = await _queryRepo.GetByIdAsync(dto.Id, token)
                 ?? throw new KeyNotFoundException($"Rental '{dto.Id}' not found.");
 
-            await _commandRepo.UpdateAsync(RentalDomain.Rental.Create(
+            var rentalToUpdate = RentalDomain.Rental.Rehydrate(
                 dto.Id,
                 rental.CustomerId,
                 rental.VehicleId,
                 rental.StartDate,
-                dto.EndDate), token);
+                rental.EndDate);
+
+            rentalToUpdate.Return(dto.EndDate);
+
+            await _commandRepo.UpdateAsync(rentalToUpdate, token);
             await _uow.CommitAsync(token);
+            await _domainEventDispatcher.DispatchAsync(rentalToUpdate.PullDomainEvents(), token);
             return new UpdateRentalResultDto(dto.Id);
         }
         catch

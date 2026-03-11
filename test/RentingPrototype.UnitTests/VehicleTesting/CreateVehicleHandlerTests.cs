@@ -1,4 +1,5 @@
 using RentingPrototype.Application.Vehicle.Commands;
+using RentingPrototype.Domain.VehicleDomain.Events;
 using RentingPrototype.UnitTests.TestDoubles;
 
 namespace RentingPrototype.UnitTests.VehicleTesting;
@@ -10,7 +11,8 @@ public sealed class CreateVehicleHandlerTests
     {
         var repo = new FakeCommandVehicleRepository();
         var uow = new FakeUnitOfWork();
-        var handler = new CreateVehicleHandler(repo, uow);
+        var dispatcher = new FakeDomainEventDispatcher();
+        var handler = new CreateVehicleHandler(repo, uow, dispatcher);
 
         var cmd = new CreateVehicleCommandDto("1234-ABC", "Toyota", "Corolla", DateTime.UtcNow.AddYears(-3));
         var result = await handler.HandleAsync(cmd, DateTime.UtcNow, CancellationToken.None);
@@ -20,6 +22,8 @@ public sealed class CreateVehicleHandlerTests
         Assert.True(uow.Committed);
         Assert.False(uow.RolledBack);
         Assert.NotEqual(Guid.Empty, result.Id);
+        Assert.Single(dispatcher.PublishedEvents);
+        Assert.IsType<VehicleCreatedDomainEvent>(dispatcher.PublishedEvents[0]);
     }
 
     [Fact]
@@ -27,7 +31,8 @@ public sealed class CreateVehicleHandlerTests
     {
         var repo = new FakeCommandVehicleRepository { ThrowOnAdd = true };
         var uow = new FakeUnitOfWork();
-        var handler = new CreateVehicleHandler(repo, uow);
+        var dispatcher = new FakeDomainEventDispatcher();
+        var handler = new CreateVehicleHandler(repo, uow, dispatcher);
 
         var cmd = new CreateVehicleCommandDto("1234-ABC", "Toyota", "Corolla", DateTime.UtcNow.AddYears(-3));
 
@@ -37,5 +42,6 @@ public sealed class CreateVehicleHandlerTests
         Assert.True(uow.Begun);
         Assert.True(uow.RolledBack);
         Assert.False(uow.Committed);
+        Assert.Empty(dispatcher.PublishedEvents);
     }
 }

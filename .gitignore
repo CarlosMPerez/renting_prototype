@@ -38,6 +38,8 @@ TestResults/
 # Logs
 # =========================
 *.log
+logs/
+src/RentingPrototype.Api/logs/
 
 # =========================
 # SQLite

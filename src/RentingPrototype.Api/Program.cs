@@ -18,6 +18,7 @@ using RentingPrototype.Application.RentalHistory.Ports;
 using RentingPrototype.Infrastructure.RentalHistory.Adapters;
 using RentingPrototype.Application.RentalHistory.Queries.VehicleRentalHistory;
 using RentingPrototype.Application.RentalHistory.Queries.CustomerRentalHistory;
+using RentingPrototype.Infrastructure.DomainEvents;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,12 @@ builder.Services.AddSingleton<ISqliteConnectionFactory>(_ => new SqliteConnectio
 // UoW como Scoped (por request)
 builder.Services.AddScoped<SqliteUnitOfWork>();
 builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<SqliteUnitOfWork>());
+
+var logsDirectory = Path.Combine(builder.Environment.ContentRootPath, "logs");
+Directory.CreateDirectory(logsDirectory);
+var domainEventsLogFilePath = Path.Combine(logsDirectory, "log.txt");
+
+builder.Services.AddScoped<IDomainEventDispatcher>(_ => new TextFileDomainEventDispatcher(domainEventsLogFilePath));
 
 // Repos scoped
 builder.Services.AddScoped<IVehicleCommandRepository, SqliteVehicleCommandRepository>();

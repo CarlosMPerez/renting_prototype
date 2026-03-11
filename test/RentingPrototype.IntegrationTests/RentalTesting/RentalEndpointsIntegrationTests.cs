@@ -135,10 +135,62 @@ public sealed class RentalEndpointsIntegrationTests
         Assert.Equal(HttpStatusCode.BadRequest, returnResponse.StatusCode);
     }
 
-    private static WebApplicationFactory<Program> CreateFactory()
+    [Fact]
+    public async Task RentAndReturnVehicle_WritesRentedAndReturnedEventsToLogsFile()
+    {
+        var contentRoot = Path.Combine(Path.GetTempPath(), $"rentingprototype-api-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(contentRoot);
+
+        try
+        {
+            await using var factory = CreateFactory(contentRoot);
+            var client = factory.CreateClient();
+
+            var rentResponse = await client.PostAsJsonAsync("/rentals/rent-vehicle", new
+            {
+                customerId = Customer1,
+                vehicleId = Vehicle1,
+                startDate = DateTime.UtcNow.AddDays(-2)
+            });
+            Assert.Equal(HttpStatusCode.Created, rentResponse.StatusCode);
+
+            var created = await rentResponse.Content.ReadFromJsonAsync<CreatedResponse>();
+            Assert.NotNull(created);
+
+            var returnResponse = await client.PostAsJsonAsync("/rentals/return-vehicle", new
+            {
+                id = created!.Id,
+                endDate = DateTime.UtcNow.AddDays(-1)
+            });
+            Assert.Equal(HttpStatusCode.OK, returnResponse.StatusCode);
+
+            var logFilePath = Path.Combine(contentRoot, "logs", "log.txt");
+            Assert.True(File.Exists(logFilePath));
+
+            var logText = await File.ReadAllTextAsync(logFilePath);
+            Assert.Contains("VehicleRentedDomainEvent", logText);
+            Assert.Contains("VehicleReturnedDomainEvent", logText);
+        }
+        finally
+        {
+            if (Directory.Exists(contentRoot))
+            {
+                Directory.Delete(contentRoot, recursive: true);
+            }
+        }
+    }
+
+    private static WebApplicationFactory<Program> CreateFactory(string? contentRoot = null)
     {
         return new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(b => b.UseEnvironment("Testing"));
+            .WithWebHostBuilder(b =>
+            {
+                b.UseEnvironment("Testing");
+                if (!string.IsNullOrWhiteSpace(contentRoot))
+                {
+                    b.UseContentRoot(contentRoot);
+                }
+            });
     }
 
     private sealed record CreatedResponse(Guid Id);

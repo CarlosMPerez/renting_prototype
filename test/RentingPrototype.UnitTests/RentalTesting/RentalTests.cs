@@ -1,4 +1,5 @@
 using RentingPrototype.Domain.RentalDomain;
+using RentingPrototype.Domain.RentalDomain.Events;
 
 namespace RentingPrototype.UnitTests.RentalTesting;
 
@@ -74,5 +75,63 @@ public sealed class RentalTests
         Assert.Equal(vehicleId, rental.VehicleId);
         Assert.Equal(startDate, rental.StartDate);
         Assert.Null(rental.EndDate);
+        var domainEvent = Assert.Single(rental.DomainEvents);
+        var rentedEvent = Assert.IsType<VehicleRentedDomainEvent>(domainEvent);
+        Assert.Equal(id, rentedEvent.RentalId);
+        Assert.Equal(vehicleId, rentedEvent.VehicleId);
+        Assert.Equal(customerId, rentedEvent.CustomerId);
+        Assert.Equal(startDate, rentedEvent.StartDate);
+    }
+
+    [Fact]
+    public void Rehydrate_DoesNotEmitDomainEvents()
+    {
+        var rental = Rental.Rehydrate(
+            id: Guid.NewGuid(),
+            customerId: Guid.NewGuid(),
+            vehicleId: Guid.NewGuid(),
+            startDate: DateTime.UtcNow.AddDays(-3),
+            endDate: null);
+
+        Assert.Empty(rental.DomainEvents);
+    }
+
+    [Fact]
+    public void Return_WithValidData_SetsEndDateAndEmitsDomainEvent()
+    {
+        var startDate = DateTime.UtcNow.AddDays(-3);
+        var endDate = DateTime.UtcNow.AddDays(-1);
+
+        var rental = Rental.Rehydrate(
+            id: Guid.NewGuid(),
+            customerId: Guid.NewGuid(),
+            vehicleId: Guid.NewGuid(),
+            startDate: startDate,
+            endDate: null);
+
+        rental.Return(endDate);
+
+        Assert.Equal(endDate, rental.EndDate);
+        var domainEvent = Assert.Single(rental.DomainEvents);
+        var returnedEvent = Assert.IsType<VehicleReturnedDomainEvent>(domainEvent);
+        Assert.Equal(rental.Id, returnedEvent.RentalId);
+        Assert.Equal(rental.VehicleId, returnedEvent.VehicleId);
+        Assert.Equal(rental.CustomerId, returnedEvent.CustomerId);
+        Assert.Equal(endDate, returnedEvent.EndDate);
+    }
+
+    [Fact]
+    public void Return_WhenAlreadyReturned_Throws()
+    {
+        var rental = Rental.Rehydrate(
+            id: Guid.NewGuid(),
+            customerId: Guid.NewGuid(),
+            vehicleId: Guid.NewGuid(),
+            startDate: DateTime.UtcNow.AddDays(-3),
+            endDate: DateTime.UtcNow.AddDays(-1));
+
+        var ex = Assert.Throws<InvalidOperationException>(() => rental.Return(DateTime.UtcNow));
+
+        Assert.Contains("already been returned", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 }

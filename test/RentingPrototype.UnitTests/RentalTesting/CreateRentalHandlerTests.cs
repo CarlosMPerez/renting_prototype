@@ -1,4 +1,5 @@
 using RentingPrototype.Application.Rental.Commands;
+using RentingPrototype.Domain.RentalDomain.Events;
 using RentingPrototype.UnitTests.TestDoubles;
 
 namespace RentingPrototype.UnitTests.RentalTesting;
@@ -15,7 +16,8 @@ public sealed class CreateRentalHandlerTests
             HasOpenRentalByVehicle = false
         };
         var uow = new FakeUnitOfWork();
-        var handler = new CreateRentalHandler(commandRepo, queryRepo, uow);
+        var dispatcher = new FakeDomainEventDispatcher();
+        var handler = new CreateRentalHandler(commandRepo, queryRepo, uow, dispatcher);
 
         var cmd = new CreateRentalCommandDto(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(-1));
 
@@ -25,6 +27,7 @@ public sealed class CreateRentalHandlerTests
         Assert.Contains("Customer already has an active rental", ex.Message, StringComparison.OrdinalIgnoreCase);
         Assert.False(uow.Begun);
         Assert.False(commandRepo.Created);
+        Assert.Empty(dispatcher.PublishedEvents);
     }
 
     [Fact]
@@ -37,7 +40,8 @@ public sealed class CreateRentalHandlerTests
             HasOpenRentalByVehicle = true
         };
         var uow = new FakeUnitOfWork();
-        var handler = new CreateRentalHandler(commandRepo, queryRepo, uow);
+        var dispatcher = new FakeDomainEventDispatcher();
+        var handler = new CreateRentalHandler(commandRepo, queryRepo, uow, dispatcher);
 
         var cmd = new CreateRentalCommandDto(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(-1));
 
@@ -47,6 +51,7 @@ public sealed class CreateRentalHandlerTests
         Assert.Contains("Vehicle already has an active rental", ex.Message, StringComparison.OrdinalIgnoreCase);
         Assert.False(uow.Begun);
         Assert.False(commandRepo.Created);
+        Assert.Empty(dispatcher.PublishedEvents);
     }
 
     [Fact]
@@ -55,7 +60,8 @@ public sealed class CreateRentalHandlerTests
         var commandRepo = new FakeRentalCommandRepository();
         var queryRepo = new FakeRentalQueryRepository();
         var uow = new FakeUnitOfWork();
-        var handler = new CreateRentalHandler(commandRepo, queryRepo, uow);
+        var dispatcher = new FakeDomainEventDispatcher();
+        var handler = new CreateRentalHandler(commandRepo, queryRepo, uow, dispatcher);
 
         var customerId = Guid.NewGuid();
         var vehicleId = Guid.NewGuid();
@@ -70,6 +76,8 @@ public sealed class CreateRentalHandlerTests
         Assert.NotEqual(Guid.Empty, result.Id);
         Assert.Equal(customerId, commandRepo.LastCreatedRental!.CustomerId);
         Assert.Equal(vehicleId, commandRepo.LastCreatedRental.VehicleId);
+        Assert.Single(dispatcher.PublishedEvents);
+        Assert.IsType<VehicleRentedDomainEvent>(dispatcher.PublishedEvents[0]);
     }
 
     [Fact]
@@ -78,7 +86,8 @@ public sealed class CreateRentalHandlerTests
         var commandRepo = new FakeRentalCommandRepository { ThrowOnCreate = true };
         var queryRepo = new FakeRentalQueryRepository();
         var uow = new FakeUnitOfWork();
-        var handler = new CreateRentalHandler(commandRepo, queryRepo, uow);
+        var dispatcher = new FakeDomainEventDispatcher();
+        var handler = new CreateRentalHandler(commandRepo, queryRepo, uow, dispatcher);
 
         var cmd = new CreateRentalCommandDto(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(-1));
 
@@ -88,5 +97,6 @@ public sealed class CreateRentalHandlerTests
         Assert.True(uow.Begun);
         Assert.True(uow.RolledBack);
         Assert.False(uow.Committed);
+        Assert.Empty(dispatcher.PublishedEvents);
     }
 }

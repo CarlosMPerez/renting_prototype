@@ -21,6 +21,7 @@ public sealed class HostConfigurationTests
 
         Assert.NotNull(services.GetService<ISqliteConnectionFactory>());
         Assert.IsType<SqliteUnitOfWork>(services.GetRequiredService<IUnitOfWork>());
+        Assert.NotNull(services.GetService<IDomainEventDispatcher>());
         Assert.NotNull(services.GetService<IVehicleCommandRepository>());
         Assert.NotNull(services.GetService<IVehicleQueryRepository>());
         Assert.NotNull(services.GetService<IRentalCommandRepository>());

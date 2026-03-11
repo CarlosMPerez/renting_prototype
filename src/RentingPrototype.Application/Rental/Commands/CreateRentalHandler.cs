@@ -11,6 +11,7 @@ public sealed class CreateRentalHandler
     private readonly IRentalCommandRepository _commandRepo;
     private readonly IRentalQueryRepository _queryRepo;
     private readonly IUnitOfWork _uow;
+    private readonly IDomainEventDispatcher _domainEventDispatcher;
 
     /// <summary>
     /// Creates a handler instance for rental creation.
@@ -18,11 +19,17 @@ public sealed class CreateRentalHandler
     /// <param name="commandRepo">Rental command repository.</param>
     /// <param name="queryRepo">Rental query repository.</param>
     /// <param name="uow">Unit of work.</param>
-    public CreateRentalHandler(IRentalCommandRepository commandRepo, IRentalQueryRepository queryRepo, IUnitOfWork uow)
+    /// <param name="domainEventDispatcher">Domain event dispatcher.</param>
+    public CreateRentalHandler(
+        IRentalCommandRepository commandRepo,
+        IRentalQueryRepository queryRepo,
+        IUnitOfWork uow,
+        IDomainEventDispatcher domainEventDispatcher)
     {
         _commandRepo = commandRepo;
         _queryRepo = queryRepo;
         _uow = uow;
+        _domainEventDispatcher = domainEventDispatcher;
     }
 
     /// <summary>
@@ -50,6 +57,7 @@ public sealed class CreateRentalHandler
         {
             await _commandRepo.CreateAsync(rental, token);
             await _uow.CommitAsync(token);
+            await _domainEventDispatcher.DispatchAsync(rental.PullDomainEvents(), token);
             return new CreateRentalResultDto(rental.Id);
         }
         catch

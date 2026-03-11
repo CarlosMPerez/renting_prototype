@@ -1,5 +1,6 @@
 using RentingPrototype.Application.Rental.Commands;
 using RentingPrototype.Application.Rental.Queries;
+using RentingPrototype.Domain.RentalDomain.Events;
 using RentingPrototype.UnitTests.TestDoubles;
 
 namespace RentingPrototype.UnitTests.RentalTesting;
@@ -20,7 +21,8 @@ public sealed class UpdateRentalHandlerTests
                 EndDate: null)
         };
         var uow = new FakeUnitOfWork();
-        var handler = new UpdateRentalHandler(commandRepo, queryRepo, uow);
+        var dispatcher = new FakeDomainEventDispatcher();
+        var handler = new UpdateRentalHandler(commandRepo, queryRepo, uow, dispatcher);
 
         var rentalId = queryRepo.RentalByIdResult.Id;
         var endDate = DateTime.UtcNow.AddDays(-1);
@@ -34,6 +36,8 @@ public sealed class UpdateRentalHandlerTests
         Assert.False(uow.RolledBack);
         Assert.Equal(rentalId, result.Id);
         Assert.Equal(endDate.Date, commandRepo.LastUpdatedRental!.EndDate!.Value.Date);
+        Assert.Single(dispatcher.PublishedEvents);
+        Assert.IsType<VehicleReturnedDomainEvent>(dispatcher.PublishedEvents[0]);
     }
 
     [Fact]
@@ -45,7 +49,8 @@ public sealed class UpdateRentalHandlerTests
             RentalByIdResult = null
         };
         var uow = new FakeUnitOfWork();
-        var handler = new UpdateRentalHandler(commandRepo, queryRepo, uow);
+        var dispatcher = new FakeDomainEventDispatcher();
+        var handler = new UpdateRentalHandler(commandRepo, queryRepo, uow, dispatcher);
 
         var cmd = new UpdateRentalCommandDto(Guid.NewGuid(), DateTime.UtcNow);
 
@@ -56,6 +61,7 @@ public sealed class UpdateRentalHandlerTests
         Assert.True(uow.RolledBack);
         Assert.False(uow.Committed);
         Assert.False(commandRepo.Updated);
+        Assert.Empty(dispatcher.PublishedEvents);
     }
 
     [Fact]
@@ -72,7 +78,8 @@ public sealed class UpdateRentalHandlerTests
                 EndDate: null)
         };
         var uow = new FakeUnitOfWork();
-        var handler = new UpdateRentalHandler(commandRepo, queryRepo, uow);
+        var dispatcher = new FakeDomainEventDispatcher();
+        var handler = new UpdateRentalHandler(commandRepo, queryRepo, uow, dispatcher);
 
         var cmd = new UpdateRentalCommandDto(queryRepo.RentalByIdResult.Id, DateTime.UtcNow);
 
@@ -82,5 +89,6 @@ public sealed class UpdateRentalHandlerTests
         Assert.True(uow.Begun);
         Assert.True(uow.RolledBack);
         Assert.False(uow.Committed);
+        Assert.Empty(dispatcher.PublishedEvents);
     }
 }

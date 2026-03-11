@@ -149,6 +149,10 @@ dotnet test RentingPrototype.sln
   - Refactorizados handler, repos y tests.
   - Terminado 2026-03-10
 2. Introducir DomainEvents
+  - Introducidos a modo de ejemplo DomainEvents para los eventos de Crear un Vehículo, Alquilar un Vehículo y Devolver un Vehículo. 
+  - Los eventos son recogidos por un log simple de texto en RentingPrototype.Api/logs/log.txt. No se han introducido referencias externas ni nuevos Nuget.
+  - Refactorizados Handlers, introducidos DomainEvents, Dispatchers, Tests, etc.
+  - Terminado 2026-03-11
 3. Mejora de arquitectura hexagonal
 4. Mejora del manejo de excepciones
 5. Añadir observabilidad

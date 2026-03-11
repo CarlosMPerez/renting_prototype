@@ -1,12 +1,15 @@
+using RentingPrototype.Domain.Common;
+using RentingPrototype.Domain.RentalDomain.Events;
+
 namespace RentingPrototype.Domain.RentalDomain;
 
-public sealed class Rental
+public sealed class Rental : AggregateRoot
 {
     public Guid Id { get; }
     public Guid CustomerId { get; }
     public Guid VehicleId { get; }
     public DateTime StartDate { get; }
-    public DateTime? EndDate { get; }
+    public DateTime? EndDate { get; private set; }
 
     /// <summary>
     /// Initializes a rental aggregate instance.
@@ -31,17 +34,66 @@ public sealed class Rental
     /// <returns>A valid <see cref="Rental"/> instance.</returns>
     public static Rental Create(Guid id, Guid customerId, Guid vehicleId, DateTime startDate, DateTime? endDate = null)
     {
-        if (customerId == Guid.Empty) throw new ArgumentException("Customer Id cannot be empty.", nameof(customerId));
-        if (vehicleId == Guid.Empty) throw new ArgumentException("Vehicle Id cannot be empty.", nameof(vehicleId));
-        if (startDate.Date > DateTime.UtcNow.Date) throw new ArgumentException("Cannot start a rental in the future", nameof(startDate));
-        if (endDate != null && startDate.Date > endDate.Value.Date) throw new ArgumentException("End Date cannot be before Start Date", nameof(endDate));
+        Validate(customerId, vehicleId, startDate, endDate);
 
-        return new Rental(
+        var rental = new Rental(
             id,
             customerId,
             vehicleId,
             startDate,
             endDate);
+
+        rental.AddDomainEvent(new VehicleRentedDomainEvent(
+            rental.Id,
+            rental.VehicleId,
+            rental.CustomerId,
+            rental.StartDate,
+            DateTime.UtcNow));
+
+        return rental;
     }
 
+    /// <summary>
+    /// Rehydrates a rental aggregate from persistence without emitting new domain events.
+    /// </summary>
+    /// <param name="id">Rental identifier.</param>
+    /// <param name="customerId">Customer identifier.</param>
+    /// <param name="vehicleId">Vehicle identifier.</param>
+    /// <param name="startDate">Rental start date.</param>
+    /// <param name="endDate">Rental end date when available.</param>
+    /// <returns>A rental aggregate with current persisted state.</returns>
+    public static Rental Rehydrate(Guid id, Guid customerId, Guid vehicleId, DateTime startDate, DateTime? endDate)
+    {
+        Validate(customerId, vehicleId, startDate, endDate);
+        return new Rental(id, customerId, vehicleId, startDate, endDate);
+    }
+
+    /// <summary>
+    /// Marks the rental as returned and emits a domain event.
+    /// </summary>
+    /// <param name="endDate">Return date.</param>
+    public void Return(DateTime endDate)
+    {
+        if (EndDate is not null)
+            throw new InvalidOperationException("Rental has already been returned.");
+        if (endDate.Date < StartDate.Date)
+            throw new ArgumentException("End Date cannot be before Start Date", nameof(endDate));
+
+        EndDate = endDate;
+
+        AddDomainEvent(new VehicleReturnedDomainEvent(
+            Id,
+            VehicleId,
+            CustomerId,
+            EndDate.Value,
+            DateTime.UtcNow));
+    }
+
+    private static void Validate(Guid customerId, Guid vehicleId, DateTime startDate, DateTime? endDate)
+    {
+        if (customerId == Guid.Empty) throw new ArgumentException("Customer Id cannot be empty.", nameof(customerId));
+        if (vehicleId == Guid.Empty) throw new ArgumentException("Vehicle Id cannot be empty.", nameof(vehicleId));
+        if (startDate.Date > DateTime.UtcNow.Date) throw new ArgumentException("Cannot start a rental in the future", nameof(startDate));
+        if (endDate != null && startDate.Date > endDate.Value.Date) throw new ArgumentException("End Date cannot be before Start Date", nameof(endDate));
+    }
 }

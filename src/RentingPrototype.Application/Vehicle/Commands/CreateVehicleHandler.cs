@@ -10,16 +10,22 @@ public sealed class CreateVehicleHandler
 {
     private readonly IVehicleCommandRepository _repo;
     private readonly IUnitOfWork _uow;
+    private readonly IDomainEventDispatcher _domainEventDispatcher;
 
     /// <summary>
     /// Creates a handler instance for vehicle creation.
     /// </summary>
     /// <param name="repo">Vehicle command repository.</param>
     /// <param name="uow">Unit of work.</param>
-    public CreateVehicleHandler(IVehicleCommandRepository repo, IUnitOfWork uow)
+    /// <param name="domainEventDispatcher">Domain event dispatcher.</param>
+    public CreateVehicleHandler(
+        IVehicleCommandRepository repo,
+        IUnitOfWork uow,
+        IDomainEventDispatcher domainEventDispatcher)
     {
         _repo = repo;
         _uow = uow;
+        _domainEventDispatcher = domainEventDispatcher;
     }
 
     /// <summary>
@@ -44,6 +50,7 @@ public sealed class CreateVehicleHandler
         {
             await _repo.AddAsync(vehicle, token);
             await _uow.CommitAsync(token);
+            await _domainEventDispatcher.DispatchAsync(vehicle.PullDomainEvents(), token);
             return new CreateVehicleResultDto(vehicle.Id.Value);
         }
         catch
