@@ -1,4 +1,5 @@
 using RentingPrototype.Application.Abstractions;
+using RentingPrototype.Domain.Common.Exceptions;
 using RentingPrototype.Application.Rental.Ports;
 using RentalDomain = RentingPrototype.Domain.RentalDomain;
 
@@ -42,9 +43,9 @@ public sealed class CreateRentalHandler
     public async Task<CreateRentalResultDto> HandleAsync(CreateRentalCommandDto dto, DateTime nowUtc, CancellationToken token)
     {
         if (await _queryRepo.HasOpenRentalByCustomerAsync(dto.CustomerId, token))
-            throw new InvalidOperationException("Customer already has an active rental.");
+            throw new BusinessRuleViolationException("Customer already has an active rental.");
         if (await _queryRepo.HasOpenRentalByVehicleAsync(dto.VehicleId, token))
-            throw new InvalidOperationException("Vehicle already has an active rental.");
+            throw new BusinessRuleViolationException("Vehicle already has an active rental.");
 
         var rental = RentalDomain.Rental.Create(
             id: Guid.NewGuid(),

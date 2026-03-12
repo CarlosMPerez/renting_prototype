@@ -1,4 +1,5 @@
 using RentingPrototype.Domain.Common;
+using RentingPrototype.Domain.Common.Exceptions;
 using RentingPrototype.Domain.VehicleDomain.Events;
 using RentingPrototype.Domain.VehicleDomain.ValueObjects;
 
@@ -41,11 +42,11 @@ public sealed class Vehicle : AggregateRoot
                                     DateTime manufactureDateUtc,
                                     DateTime nowUtc)
     {
-        if (id == Guid.Empty) throw new ArgumentException("Id cannot be empty.", nameof(id));
-        if (string.IsNullOrWhiteSpace(brand)) throw new ArgumentException("Brand is required.", nameof(brand));
-        if (brand.Length > 100) throw new ArgumentException("Brand max length is 100.", nameof(brand));
-        if (string.IsNullOrWhiteSpace(model)) throw new ArgumentException("Model is required.", nameof(model));
-        if (model.Length > 100) throw new ArgumentException("Model max length is 100.", nameof(model));
+        if (id == Guid.Empty) throw new DomainValidationException("Id cannot be empty.");
+        if (string.IsNullOrWhiteSpace(brand)) throw new DomainValidationException("Brand is required.");
+        if (brand.Length > 100) throw new DomainValidationException("Brand max length is 100.");
+        if (string.IsNullOrWhiteSpace(model)) throw new DomainValidationException("Model is required.");
+        if (model.Length > 100) throw new DomainValidationException("Model max length is 100.");
 
         var vehicle = new Vehicle(
             VehicleId.From(id),

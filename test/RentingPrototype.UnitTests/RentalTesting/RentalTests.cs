@@ -1,3 +1,4 @@
+using RentingPrototype.Domain.Common.Exceptions;
 using RentingPrototype.Domain.RentalDomain;
 using RentingPrototype.Domain.RentalDomain.Events;
 
@@ -8,7 +9,7 @@ public sealed class RentalTests
     [Fact]
     public void Create_RejectsEmptyCustomerId()
     {
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<DomainValidationException>(() =>
             Rental.Create(
                 id: Guid.NewGuid(),
                 customerId: Guid.Empty,
@@ -21,7 +22,7 @@ public sealed class RentalTests
     [Fact]
     public void Create_RejectsEmptyVehicleId()
     {
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<DomainValidationException>(() =>
             Rental.Create(
                 id: Guid.NewGuid(),
                 customerId: Guid.NewGuid(),
@@ -34,7 +35,7 @@ public sealed class RentalTests
     [Fact]
     public void Create_RejectsFutureStartDate()
     {
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<DomainValidationException>(() =>
             Rental.Create(
                 id: Guid.NewGuid(),
                 customerId: Guid.NewGuid(),
@@ -49,7 +50,7 @@ public sealed class RentalTests
     {
         var startDate = DateTime.UtcNow.AddDays(-2);
 
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<DomainValidationException>(() =>
             Rental.Create(
                 id: Guid.NewGuid(),
                 customerId: Guid.NewGuid(),
@@ -130,7 +131,7 @@ public sealed class RentalTests
             startDate: DateTime.UtcNow.AddDays(-3),
             endDate: DateTime.UtcNow.AddDays(-1));
 
-        var ex = Assert.Throws<InvalidOperationException>(() => rental.Return(DateTime.UtcNow));
+        var ex = Assert.Throws<BusinessRuleViolationException>(() => rental.Return(DateTime.UtcNow));
 
         Assert.Contains("already been returned", ex.Message, StringComparison.OrdinalIgnoreCase);
     }

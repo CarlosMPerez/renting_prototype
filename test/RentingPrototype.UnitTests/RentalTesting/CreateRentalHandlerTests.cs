@@ -1,4 +1,5 @@
 using RentingPrototype.Application.Rental.Commands;
+using RentingPrototype.Domain.Common.Exceptions;
 using RentingPrototype.Domain.RentalDomain.Events;
 using RentingPrototype.UnitTests.TestDoubles;
 
@@ -21,7 +22,7 @@ public sealed class CreateRentalHandlerTests
 
         var cmd = new CreateRentalCommandDto(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(-1));
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<BusinessRuleViolationException>(() =>
             handler.HandleAsync(cmd, DateTime.UtcNow, CancellationToken.None));
 
         Assert.Contains("Customer already has an active rental", ex.Message, StringComparison.OrdinalIgnoreCase);
@@ -45,7 +46,7 @@ public sealed class CreateRentalHandlerTests
 
         var cmd = new CreateRentalCommandDto(Guid.NewGuid(), Guid.NewGuid(), DateTime.UtcNow.AddDays(-1));
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<BusinessRuleViolationException>(() =>
             handler.HandleAsync(cmd, DateTime.UtcNow, CancellationToken.None));
 
         Assert.Contains("Vehicle already has an active rental", ex.Message, StringComparison.OrdinalIgnoreCase);

@@ -1,3 +1,5 @@
+using RentingPrototype.Domain.Common.Exceptions;
+
 namespace RentingPrototype.Domain.VehicleDomain.ValueObjects;
 
 public readonly record struct VehicleId(Guid Value)
@@ -9,7 +11,7 @@ public readonly record struct VehicleId(Guid Value)
     public static VehicleId From(Guid value)
     {
         if (value == Guid.Empty)
-            throw new ArgumentException("vehicleId cannot be empty");
+            throw new DomainValidationException("VehicleId cannot be empty.");
 
         return new VehicleId(value);
     }

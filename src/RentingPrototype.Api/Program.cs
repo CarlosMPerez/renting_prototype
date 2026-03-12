@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Scalar.AspNetCore;
+using RentingPrototype.Api.ExceptionHandling;
 using RentingPrototype.Api.Endpoints.Vehicle;
 using RentingPrototype.Application.Abstractions;
 using RentingPrototype.Application.Vehicle.Commands;
@@ -19,6 +20,7 @@ using RentingPrototype.Infrastructure.RentalHistory.Adapters;
 using RentingPrototype.Application.RentalHistory.Queries.VehicleRentalHistory;
 using RentingPrototype.Application.RentalHistory.Queries.CustomerRentalHistory;
 using RentingPrototype.Infrastructure.DomainEvents;
+using RentingPrototype.Infrastructure.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,9 +36,10 @@ builder.Services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<SqliteUnitOf
 
 var logsDirectory = Path.Combine(builder.Environment.ContentRootPath, "logs");
 Directory.CreateDirectory(logsDirectory);
-var domainEventsLogFilePath = Path.Combine(logsDirectory, "log.txt");
+var appLogFilePath = Path.Combine(logsDirectory, "log.txt");
 
-builder.Services.AddScoped<IDomainEventDispatcher>(_ => new TextFileDomainEventDispatcher(domainEventsLogFilePath));
+builder.Services.AddSingleton<IAppLogSink>(_ => new TextFileAppLogSink(appLogFilePath));
+builder.Services.AddScoped<IDomainEventDispatcher, TextFileDomainEventDispatcher>();
 
 // Repos scoped
 builder.Services.AddScoped<IVehicleCommandRepository, SqliteVehicleCommandRepository>();
@@ -59,6 +62,8 @@ builder.Services.AddScoped<VehicleRentalHistoryQueryHandler>();
 builder.Services.AddScoped<CustomerRentalHistoryQueryHandler>();
 
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
 
@@ -66,6 +71,8 @@ if (inMemoryKeepAliveConnection is not null)
 {
     app.Lifetime.ApplicationStopped.Register(() => inMemoryKeepAliveConnection.Dispose());
 }
+
+app.UseExceptionHandler();
 
 app.MapVehicleEndpoints();
 app.MapRentalsEndpoints();

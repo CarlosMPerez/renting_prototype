@@ -31,7 +31,7 @@ public sealed class RentalEndpointsIntegrationTests
     }
 
     [Fact]
-    public async Task RentVehicle_WhenCustomerAlreadyHasOpenRental_Returns400()
+    public async Task RentVehicle_WhenCustomerAlreadyHasOpenRental_Returns409()
     {
         await using var factory = CreateFactory();
         var client = factory.CreateClient();
@@ -53,11 +53,11 @@ public sealed class RentalEndpointsIntegrationTests
             startDate
         });
 
-        Assert.Equal(HttpStatusCode.BadRequest, second.StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
     }
 
     [Fact]
-    public async Task RentVehicle_WhenVehicleAlreadyHasOpenRental_Returns400()
+    public async Task RentVehicle_WhenVehicleAlreadyHasOpenRental_Returns409()
     {
         await using var factory = CreateFactory();
         var client = factory.CreateClient();
@@ -79,7 +79,7 @@ public sealed class RentalEndpointsIntegrationTests
             startDate
         });
 
-        Assert.Equal(HttpStatusCode.BadRequest, second.StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
     }
 
     [Fact]
@@ -170,6 +170,51 @@ public sealed class RentalEndpointsIntegrationTests
             var logText = await File.ReadAllTextAsync(logFilePath);
             Assert.Contains("VehicleRentedDomainEvent", logText);
             Assert.Contains("VehicleReturnedDomainEvent", logText);
+        }
+        finally
+        {
+            if (Directory.Exists(contentRoot))
+            {
+                Directory.Delete(contentRoot, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task RentVehicle_WhenBusinessRuleFails_WritesExceptionToLogsFile()
+    {
+        var contentRoot = Path.Combine(Path.GetTempPath(), $"rentingprototype-api-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(contentRoot);
+
+        try
+        {
+            await using var factory = CreateFactory(contentRoot);
+            var client = factory.CreateClient();
+
+            var startDate = DateTime.UtcNow.AddDays(-1);
+
+            var first = await client.PostAsJsonAsync("/rentals/rent-vehicle", new
+            {
+                customerId = Customer1,
+                vehicleId = Vehicle1,
+                startDate
+            });
+            Assert.Equal(HttpStatusCode.Created, first.StatusCode);
+
+            var second = await client.PostAsJsonAsync("/rentals/rent-vehicle", new
+            {
+                customerId = Customer1,
+                vehicleId = Vehicle2,
+                startDate
+            });
+            Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
+
+            var logFilePath = Path.Combine(contentRoot, "logs", "log.txt");
+            Assert.True(File.Exists(logFilePath));
+
+            var logText = await File.ReadAllTextAsync(logFilePath);
+            Assert.Contains("BusinessRuleViolationException", logText);
+            Assert.Contains("\"Type\":\"exception\"", logText);
         }
         finally
         {

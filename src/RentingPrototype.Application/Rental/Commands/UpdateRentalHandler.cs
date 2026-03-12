@@ -1,4 +1,5 @@
 using RentingPrototype.Application.Abstractions;
+using RentingPrototype.Application.Common.Exceptions;
 using RentingPrototype.Application.Rental.Ports;
 using RentalDomain = RentingPrototype.Domain.RentalDomain;
 
@@ -45,7 +46,7 @@ public sealed class UpdateRentalHandler
         try
         {
             var rental = await _queryRepo.GetByIdAsync(dto.Id, token)
-                ?? throw new KeyNotFoundException($"Rental '{dto.Id}' not found.");
+                ?? throw new NotFoundException($"Rental '{dto.Id}' not found.");
 
             var rentalToUpdate = RentalDomain.Rental.Rehydrate(
                 dto.Id,

@@ -31,7 +31,7 @@ public sealed class VehicleReadAndValidationIntegrationTests
     }
 
     [Fact]
-    public async Task PostVehicles_WhenVehicleTooOld_Returns400()
+    public async Task PostVehicles_WhenVehicleTooOld_Returns409()
     {
         await using var factory = CreateFactory();
         var client = factory.CreateClient();
@@ -46,7 +46,7 @@ public sealed class VehicleReadAndValidationIntegrationTests
 
         var response = await client.PostAsJsonAsync("/vehicles", payload);
 
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 
     private static WebApplicationFactory<Program> CreateFactory()

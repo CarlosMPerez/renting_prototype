@@ -1,3 +1,5 @@
+using RentingPrototype.Api.Contracts.Rental;
+using RentingPrototype.Api.Validation;
 using RentingPrototype.Application.Rental.Commands;
 
 namespace RentingPrototype.Api.Endpoints.Rental;
@@ -28,29 +30,21 @@ public static class RentalEndpoints
     /// <param name="token">Cancellation token for the operation.</param>
     /// <returns>HTTP result representing creation outcome.</returns>
     private static async Task<IResult> RentVehicle(
-            CreateRentalCommandDto request,
+            CreateRentalRequest request,
             CreateRentalHandler handler,
             CancellationToken token)
     {
-        try
-        {
-            var cmd = new CreateRentalCommandDto(request.CustomerId,
-                request.VehicleId, request.StartDate);
-            var result = await handler.HandleAsync(cmd, DateTime.UtcNow, token);
-            return Results.Created($"/rentals/{result.Id}", result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Results.BadRequest(new { error = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return Results.BadRequest(new { error = ex.Message });
-        }
-        catch (Exception ex) 
-        {
-            return Results.InternalServerError(ex.Message);
-        }
+        var validationErrors = EndpointRequestValidator.Validate(request);
+        if (validationErrors is not null)
+            return Results.ValidationProblem(validationErrors);
+
+        var cmd = new CreateRentalCommandDto(
+            request.CustomerId,
+            request.VehicleId,
+            request.StartDate);
+
+        var result = await handler.HandleAsync(cmd, DateTime.UtcNow, token);
+        return Results.Created($"/rentals/{result.Id}", result);
     }
 
     /// <summary>
@@ -61,31 +55,16 @@ public static class RentalEndpoints
     /// <param name="token">Cancellation token for the operation.</param>
     /// <returns>HTTP result representing update outcome.</returns>
     private static async Task<IResult> ReturnVehicle(
-            UpdateRentalCommandDto request,
+            ReturnRentalRequest request,
             UpdateRentalHandler handler,
             CancellationToken token)
     {
-        try
-        {
-            var cmd = new UpdateRentalCommandDto(request.Id, request.EndDate);
-            var result = await handler.HandleAsync(cmd, token);
-            return Results.Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Results.BadRequest(new { error = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return Results.BadRequest(new { error = ex.Message });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return Results.BadRequest(new { error = ex.Message });
-        }
-        catch (Exception ex) 
-        {
-            return Results.InternalServerError(ex.Message);
-        }
+        var validationErrors = EndpointRequestValidator.Validate(request);
+        if (validationErrors is not null)
+            return Results.ValidationProblem(validationErrors);
+
+        var cmd = new UpdateRentalCommandDto(request.Id, request.EndDate);
+        var result = await handler.HandleAsync(cmd, token);
+        return Results.Ok(result);
     }
 }

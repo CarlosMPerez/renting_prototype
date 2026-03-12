@@ -1,4 +1,5 @@
 using RentingPrototype.Application.Rental.Commands;
+using RentingPrototype.Application.Common.Exceptions;
 using RentingPrototype.Application.Rental.Queries;
 using RentingPrototype.Domain.RentalDomain.Events;
 using RentingPrototype.UnitTests.TestDoubles;
@@ -54,7 +55,7 @@ public sealed class UpdateRentalHandlerTests
 
         var cmd = new UpdateRentalCommandDto(Guid.NewGuid(), DateTime.UtcNow);
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+        await Assert.ThrowsAsync<NotFoundException>(() =>
             handler.HandleAsync(cmd, CancellationToken.None));
 
         Assert.True(uow.Begun);

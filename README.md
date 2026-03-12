@@ -155,5 +155,14 @@ dotnet test RentingPrototype.sln
   - Terminado 2026-03-11
 3. Mejora de arquitectura hexagonal
 4. Mejora del manejo de excepciones
+  - Se ha introducido un manejo global de excepciones
+  - Se han introducido requests para manejar validaciones si usar componentes externos como FluentValidator
+  - Se han creado nuevas excepciones de negocio tipadas
+  - Se unifica el logging de eventos para que recoja también las excepciones nuevas
+  - Reglas de negocio devuelven 409 Conflict
+  - No encontrado devuelve 404 correctamente
+  - Errores no controlados devuelven 500 sin exponer mensaje interno, que queda logeado con stack trace
+  - Excepciones de negocio propias quedan logeadas pero sin stack trace para no engordar el log innecesariamente
+  - Terminado 2026-03-12
 5. Añadir observabilidad
 6. Añadir logging estructurado

@@ -1,4 +1,5 @@
 using RentingPrototype.Domain.Common;
+using RentingPrototype.Domain.Common.Exceptions;
 using RentingPrototype.Domain.RentalDomain.Events;
 
 namespace RentingPrototype.Domain.RentalDomain;
@@ -75,9 +76,9 @@ public sealed class Rental : AggregateRoot
     public void Return(DateTime endDate)
     {
         if (EndDate is not null)
-            throw new InvalidOperationException("Rental has already been returned.");
+            throw new BusinessRuleViolationException("Rental has already been returned.");
         if (endDate.Date < StartDate.Date)
-            throw new ArgumentException("End Date cannot be before Start Date", nameof(endDate));
+            throw new DomainValidationException("End Date cannot be before Start Date.");
 
         EndDate = endDate;
 
@@ -91,9 +92,9 @@ public sealed class Rental : AggregateRoot
 
     private static void Validate(Guid customerId, Guid vehicleId, DateTime startDate, DateTime? endDate)
     {
-        if (customerId == Guid.Empty) throw new ArgumentException("Customer Id cannot be empty.", nameof(customerId));
-        if (vehicleId == Guid.Empty) throw new ArgumentException("Vehicle Id cannot be empty.", nameof(vehicleId));
-        if (startDate.Date > DateTime.UtcNow.Date) throw new ArgumentException("Cannot start a rental in the future", nameof(startDate));
-        if (endDate != null && startDate.Date > endDate.Value.Date) throw new ArgumentException("End Date cannot be before Start Date", nameof(endDate));
+        if (customerId == Guid.Empty) throw new DomainValidationException("Customer Id cannot be empty.");
+        if (vehicleId == Guid.Empty) throw new DomainValidationException("Vehicle Id cannot be empty.");
+        if (startDate.Date > DateTime.UtcNow.Date) throw new DomainValidationException("Cannot start a rental in the future.");
+        if (endDate != null && startDate.Date > endDate.Value.Date) throw new DomainValidationException("End Date cannot be before Start Date.");
     }
 }

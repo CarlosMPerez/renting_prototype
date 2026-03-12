@@ -1,3 +1,5 @@
+using RentingPrototype.Domain.Common.Exceptions;
+
 namespace RentingPrototype.Domain.VehicleDomain.ValueObjects;
 
 public sealed record ManufactureDateOnly
@@ -12,7 +14,7 @@ public sealed record ManufactureDateOnly
     public static ManufactureDateOnly Create(DateOnly value, DateOnly nowUtc)
     {
         if (!IsValidAge(value, nowUtc))
-            throw new InvalidOperationException("Vehicle is older than 5 years and cannot be registered.");
+            throw new BusinessRuleViolationException("Vehicle is older than 5 years and cannot be registered.");
 
         return new ManufactureDateOnly(value);
     }
@@ -22,7 +24,7 @@ public sealed record ManufactureDateOnly
         var convValue = DateOnly.FromDateTime(value);
         var convNow = DateOnly.FromDateTime(nowUtc);
         if (!IsValidAge(convValue, convNow))
-            throw new InvalidOperationException("Vehicle is older than 5 years and cannot be registered.");
+            throw new BusinessRuleViolationException("Vehicle is older than 5 years and cannot be registered.");
 
         return new ManufactureDateOnly(convValue);
     }

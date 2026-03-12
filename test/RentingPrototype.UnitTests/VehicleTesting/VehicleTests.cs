@@ -1,4 +1,5 @@
-﻿using RentingPrototype.Domain.VehicleDomain;
+using RentingPrototype.Domain.Common.Exceptions;
+using RentingPrototype.Domain.VehicleDomain;
 using RentingPrototype.Domain.VehicleDomain.Events;
 
 namespace RentingPrototype.UnitTests.VehicleTesting;
@@ -9,7 +10,7 @@ public class VehicleTests
     public void Create_RejectsVehicleOlderThan5Years()
     {
         var manufactureDate = DateTime.UtcNow.AddYears(-5).AddDays(-1);
-        var ex = Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<BusinessRuleViolationException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-TEST",
@@ -17,8 +18,7 @@ public class VehicleTests
                 model: "Corolla",
                 manufactureDateUtc: manufactureDate,
                 nowUtc: DateTime.UtcNow
-                )
-        );
+            ));
 
         Assert.Contains("older than 5 years", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -26,7 +26,7 @@ public class VehicleTests
     [Fact]
     public void Create_AllowsVehicleExactly5YearsOld()
     {
-        var manufactureDate = DateTime.UtcNow.AddYears(-5); // borderline OK
+        var manufactureDate = DateTime.UtcNow.AddYears(-5);
         var nowUtc = DateTime.UtcNow;
 
         var v = Vehicle.Create(
@@ -69,7 +69,7 @@ public class VehicleTests
     [InlineData("   ")]
     public void Create_RejectsEmptyLicensePlate(string plate)
     {
-        Assert.Throws<ArgumentException>(() =>
+        Assert.Throws<DomainValidationException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: plate,
@@ -98,7 +98,7 @@ public class VehicleTests
     [Fact]
     public void Create_RejectsLongLicensePlate()
     {
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<DomainValidationException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -114,7 +114,7 @@ public class VehicleTests
     [Fact]
     public void Create_RejectsLongBrand()
     {
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<DomainValidationException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-ABC",
@@ -130,7 +130,7 @@ public class VehicleTests
     [Fact]
     public void Create_RejectsLongModel()
     {
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<DomainValidationException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-ABC",
@@ -150,7 +150,7 @@ public class VehicleTests
     public void Create_RejectsNullOrEmptyBrand(string? brand)
     {
 #pragma warning disable CS8604 // Possible null reference argument.
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<DomainValidationException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-ABC",
@@ -171,7 +171,7 @@ public class VehicleTests
     public void Create_RejectsNullOrEmptyModel(string? model)
     {
 #pragma warning disable CS8604 // Possible null reference argument.
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<DomainValidationException>(() =>
             Vehicle.Create(
                 id: Guid.NewGuid(),
                 licensePlate: "1234-ABC",

@@ -1,3 +1,5 @@
+using RentingPrototype.Api.Contracts.Vehicle;
+using RentingPrototype.Api.Validation;
 using RentingPrototype.Application.Vehicle.Commands;
 using RentingPrototype.Application.Vehicle.Queries;
 
@@ -74,28 +76,21 @@ public static class VehicleEndpoints
     /// <param name="token">Cancellation token for the operation.</param>
     /// <returns>HTTP result representing creation outcome.</returns>
     private static async Task<IResult> CreateVehicle(
-            CreateVehicleCommandDto request,
+            CreateVehicleRequest request,
             CreateVehicleHandler handler,
             CancellationToken token)
     {
-        try
-        {
-            var cmd = new CreateVehicleCommandDto(request.LicensePlate,
-                request.Brand, request.Model, request.ManufactureDateUtc);
-            var result = await handler.HandleAsync(cmd, DateTime.UtcNow, token);
-            return Results.Created($"/vehicles/{result.Id}", result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Results.BadRequest(new { error = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
-            return Results.BadRequest(new { error = ex.Message });
-        }
-        catch (Exception ex) 
-        {
-            return Results.InternalServerError(ex.Message);
-        }
+        var validationErrors = EndpointRequestValidator.Validate(request);
+        if (validationErrors is not null)
+            return Results.ValidationProblem(validationErrors);
+
+        var cmd = new CreateVehicleCommandDto(
+            request.LicensePlate,
+            request.Brand,
+            request.Model,
+            request.ManufactureDateUtc);
+
+        var result = await handler.HandleAsync(cmd, DateTime.UtcNow, token);
+        return Results.Created($"/vehicles/{result.Id}", result);
     }
 }
