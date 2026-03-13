@@ -11,7 +11,7 @@ public sealed record RentalQueryResultDto(
     )
 {
     /// <summary>
-    /// Materialization constructor used by Dapper when SQLite returns text values.
+    /// Materialization constructor used by Dapper when Sqlite returns text values.
     /// </summary>
     /// <param name="id">Rental identifier as string.</param>
     /// <param name="customerId">Customer identifier as string.</param>
@@ -34,7 +34,7 @@ public sealed record RentalQueryResultDto(
     }
 
     /// <summary>
-    /// Parses a SQLite date representation to <see cref="DateTime"/>.
+    /// Parses a Sqlite date representation to <see cref="DateTime"/>.
     /// </summary>
     /// <param name="value">Date value to parse.</param>
     /// <returns>The parsed date.</returns>

@@ -26,9 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\RentingPrototype.Api\RentingPrototype.Api.csproj" />
-    <ProjectReference Include="..\..\src\RentingPrototype.Application\RentingPrototype.Application.csproj" />
-    <ProjectReference Include="..\..\src\RentingPrototype.Infrastructure\RentingPrototype.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\RentingPrototype.Host\RentingPrototype.Host.csproj" />
+    <ProjectReference Include="..\..\..\src\RentingPrototype.Application\RentingPrototype.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\RentingPrototype.Infrastructure\RentingPrototype.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

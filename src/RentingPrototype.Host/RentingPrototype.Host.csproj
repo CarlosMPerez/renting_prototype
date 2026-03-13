@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\RentingPrototype.Api\RentingPrototype.Api.csproj" />
+    <ProjectReference Include="..\RentingPrototype.Application\RentingPrototype.Application.csproj" />
+    <ProjectReference Include="..\RentingPrototype.Infrastructure\RentingPrototype.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

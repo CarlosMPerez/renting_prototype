@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using RentingPrototype.Api.Contracts.Vehicle;
 using RentingPrototype.Api.Validation;
 using RentingPrototype.Application.Vehicle.Commands;
@@ -12,7 +15,7 @@ public static class VehicleEndpoints
     /// </summary>
     /// <param name="app">Application route builder.</param>
     /// <returns>The configured route group.</returns>
-    public static RouteGroupBuilder MapVehicleEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapVehicleEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/vehicles").WithTags("Vehicles");
 

@@ -1,26 +1,23 @@
 using Microsoft.Data.Sqlite;
 using Scalar.AspNetCore;
-using RentingPrototype.Api.ExceptionHandling;
-using RentingPrototype.Api.Endpoints.Vehicle;
+using RentingPrototype.Host.ExceptionHandling;
 using RentingPrototype.Application.Abstractions;
 using RentingPrototype.Application.Vehicle.Commands;
 using RentingPrototype.Application.Vehicle.Ports;
 using RentingPrototype.Infrastructure.Persistence.Sqlite;
-using RentingPrototype.Infrastructure.Persistence.SQLite;
 using RentingPrototype.Infrastructure.Vehicle.Adapters;
 using RentingPrototype.Application.Vehicle.Queries;
-using RentingPrototype.Api.Endpoints.Rental;
 using RentingPrototype.Infrastructure.Rental.Adapters;
 using RentingPrototype.Application.Rental.Ports;
 using RentingPrototype.Application.Rental.Commands;
 using RentingPrototype.Application.Rental.Queries;
-using RentingPrototype.Api.Endpoints.RentalHistory;
 using RentingPrototype.Application.RentalHistory.Ports;
 using RentingPrototype.Infrastructure.RentalHistory.Adapters;
 using RentingPrototype.Application.RentalHistory.Queries.VehicleRentalHistory;
 using RentingPrototype.Application.RentalHistory.Queries.CustomerRentalHistory;
 using RentingPrototype.Infrastructure.DomainEvents;
 using RentingPrototype.Infrastructure.Logging;
+using RentingPrototype.Api.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,9 +71,7 @@ if (inMemoryKeepAliveConnection is not null)
 
 app.UseExceptionHandler();
 
-app.MapVehicleEndpoints();
-app.MapRentalsEndpoints();
-app.MapRentalHistoryEndpoints();
+app.MapApiEndpoints();
 
 app.MapOpenApi("/openapi/{documentName}.json");
 app.MapScalarApiReference(options =>
@@ -90,7 +85,7 @@ app.MapGet("/", () => Results.Redirect("/scalar"));
 app.Run();
 
 /// <summary>
-/// Creates the SQLite schema required by the application and returns the connection data.
+/// Creates the Sqlite schema required by the application and returns the connection data.
 /// In testing environment this uses an in-memory database with a keep-alive connection.
 /// </summary>
 /// <returns>
@@ -136,7 +131,7 @@ app.Run();
 
     if (!File.Exists(dbPath))
     {
-        Console.WriteLine("Database not found. Creating new SQLite database...");
+        Console.WriteLine("Database not found. Creating new Sqlite database...");
         using var conn = new SqliteConnection(cnnString);
         conn.Open();
 

@@ -13,7 +13,7 @@ public class SqliteRentalHistoryQueryRepository : IRentalHistoryQueryRepository
     /// <summary>
     /// Creates a rental history query repository.
     /// </summary>
-    /// <param name="factory">SQLite connection factory.</param>
+    /// <param name="factory">Sqlite connection factory.</param>
     public SqliteRentalHistoryQueryRepository(ISqliteConnectionFactory factory)
         => _factory = factory;
 

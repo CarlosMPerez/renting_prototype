@@ -1,6 +1,6 @@
 using Dapper;
 using RentingPrototype.Application.Rental.Ports;
-using RentingPrototype.Infrastructure.Persistence.SQLite;
+using RentingPrototype.Infrastructure.Persistence.Sqlite;
 using RentalDomain = RentingPrototype.Domain.RentalDomain;
 
 namespace RentingPrototype.Infrastructure.Rental.Adapters;
@@ -12,7 +12,7 @@ public sealed class SqliteRentalCommandRepository : IRentalCommandRepository
     /// <summary>
     /// Creates a rental command repository bound to the active unit of work.
     /// </summary>
-    /// <param name="uow">SQLite unit of work.</param>
+    /// <param name="uow">Sqlite unit of work.</param>
     public SqliteRentalCommandRepository(SqliteUnitOfWork uow)
     {
         _uow = uow;

@@ -8,17 +8,17 @@ public sealed class SqliteConnectionFactory : ISqliteConnectionFactory
     private readonly string _cnnString;
 
     /// <summary>
-    /// Creates a SQLite connection factory.
+    /// Creates a Sqlite connection factory.
     /// </summary>
-    /// <param name="connectionString">SQLite connection string.</param>
+    /// <param name="connectionString">Sqlite connection string.</param>
     public SqliteConnectionFactory(string connectionString)
     {
         _cnnString = connectionString;
     }
 
     /// <summary>
-    /// Creates a new SQLite connection configured with the factory connection string.
+    /// Creates a new Sqlite connection configured with the factory connection string.
     /// </summary>
-    /// <returns>An unopened SQLite connection.</returns>
+    /// <returns>An unopened Sqlite connection.</returns>
     public IDbConnection CreateConnection() => new SqliteConnection(_cnnString);
 }

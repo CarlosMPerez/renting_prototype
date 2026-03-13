@@ -6,7 +6,7 @@ using RentingPrototype.Application.Abstractions;
 using RentingPrototype.Application.Common.Exceptions;
 using RentingPrototype.Domain.Common.Exceptions;
 
-namespace RentingPrototype.Api.ExceptionHandling;
+namespace RentingPrototype.Host.ExceptionHandling;
 
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {

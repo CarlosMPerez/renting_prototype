@@ -15,11 +15,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.Infrastruc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{056A85C6-9886-4600-B7C2-204014FACBB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.UnitTests", "test\RentingPrototype.UnitTests\RentingPrototype.UnitTests.csproj", "{BBCDD867-DB6D-4BB7-87E4-EA38F58CB33A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.UnitTests", "test\unit\RentingPrototype.UnitTests\RentingPrototype.UnitTests.csproj", "{BBCDD867-DB6D-4BB7-87E4-EA38F58CB33A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.IntegrationTests", "test\RentingPrototype.IntegrationTests\RentingPrototype.IntegrationTests.csproj", "{DD4D53E1-5EF6-4834-84CF-286C4A9EA984}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.IntegrationTests", "test\functional\RentingPrototype.IntegrationTests\RentingPrototype.IntegrationTests.csproj", "{DD4D53E1-5EF6-4834-84CF-286C4A9EA984}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.HostTests", "test\RentingPrototype.HostTests\RentingPrototype.HostTests.csproj", "{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.HostTests", "test\infrastructure\RentingPrototype.HostTests\RentingPrototype.HostTests.csproj", "{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ED88D5D6-1DAA-4135-A313-4AB9E48C22C1}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		codex.toml = codex.toml
 		global.json = global.json
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RentingPrototype.Host", "src\RentingPrototype.Host\RentingPrototype.Host.csproj", "{0A9E8591-CE64-47BB-98ED-91B879BFED47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,10 @@ Global
 		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A9E8591-CE64-47BB-98ED-91B879BFED47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A9E8591-CE64-47BB-98ED-91B879BFED47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A9E8591-CE64-47BB-98ED-91B879BFED47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A9E8591-CE64-47BB-98ED-91B879BFED47}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,6 +82,7 @@ Global
 		{BBCDD867-DB6D-4BB7-87E4-EA38F58CB33A} = {056A85C6-9886-4600-B7C2-204014FACBB3}
 		{DD4D53E1-5EF6-4834-84CF-286C4A9EA984} = {056A85C6-9886-4600-B7C2-204014FACBB3}
 		{673AB1FB-10A8-4ECA-8E28-0E50F96CD258} = {056A85C6-9886-4600-B7C2-204014FACBB3}
+		{0A9E8591-CE64-47BB-98ED-91B879BFED47} = {9619AB63-1416-46CF-AC3E-775567914317}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {33B34040-321E-49F1-8513-4AC868888AE4}

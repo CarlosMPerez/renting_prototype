@@ -42,7 +42,7 @@ logs/
 src/RentingPrototype.Api/logs/
 
 # =========================
-# SQLite
+# Sqlite
 # =========================
 *.db
 *.db-shm

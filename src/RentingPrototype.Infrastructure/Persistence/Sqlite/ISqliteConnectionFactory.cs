@@ -7,6 +7,6 @@ public interface ISqliteConnectionFactory
     /// <summary>
     /// Creates a new database connection instance.
     /// </summary>
-    /// <returns>An unopened SQLite connection.</returns>
+    /// <returns>An unopened Sqlite connection.</returns>
     IDbConnection CreateConnection();
 }

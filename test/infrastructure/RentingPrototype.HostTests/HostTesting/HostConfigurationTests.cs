@@ -6,7 +6,6 @@ using RentingPrototype.Application.Rental.Ports;
 using RentingPrototype.Application.RentalHistory.Ports;
 using RentingPrototype.Application.Vehicle.Ports;
 using RentingPrototype.Infrastructure.Persistence.Sqlite;
-using RentingPrototype.Infrastructure.Persistence.SQLite;
 
 namespace RentingPrototype.HostTests.HostTesting;
 

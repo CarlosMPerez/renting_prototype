@@ -2,7 +2,7 @@ using System.Data;
 using RentingPrototype.Application.Abstractions;
 using RentingPrototype.Infrastructure.Persistence.Sqlite;
 
-namespace RentingPrototype.Infrastructure.Persistence.SQLite;
+namespace RentingPrototype.Infrastructure.Persistence.Sqlite;
 
 public class SqliteUnitOfWork : IUnitOfWork
 {
@@ -12,9 +12,9 @@ public class SqliteUnitOfWork : IUnitOfWork
     public IDbTransaction? Transaction { get; private set; }
 
     /// <summary>
-    /// Creates a unit-of-work instance backed by SQLite.
+    /// Creates a unit-of-work instance backed by Sqlite.
     /// </summary>
-    /// <param name="factory">SQLite connection factory.</param>
+    /// <param name="factory">Sqlite connection factory.</param>
     public SqliteUnitOfWork(ISqliteConnectionFactory factory)
     {
         _factory = factory;

@@ -12,7 +12,7 @@ public sealed class SqliteRentalQueryRepository : IRentalQueryRepository
     /// <summary>
     /// Creates a rental query repository.
     /// </summary>
-    /// <param name="factory">SQLite connection factory.</param>
+    /// <param name="factory">Sqlite connection factory.</param>
     public SqliteRentalQueryRepository(ISqliteConnectionFactory factory)
         => _factory = factory;
 

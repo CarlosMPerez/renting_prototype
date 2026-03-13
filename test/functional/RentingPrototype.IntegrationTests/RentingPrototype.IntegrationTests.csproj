@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\RentingPrototype.Api\RentingPrototype.Api.csproj" />
+    <ProjectReference Include="..\..\..\src\RentingPrototype.Host\RentingPrototype.Host.csproj" />
   </ItemGroup>
 
 </Project>

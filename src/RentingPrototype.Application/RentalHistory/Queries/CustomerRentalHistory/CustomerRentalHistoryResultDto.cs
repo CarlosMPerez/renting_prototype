@@ -11,7 +11,7 @@ public sealed record CustomerRentalHistoryResultDto(
     DateOnly? EndDate)
 {
     /// <summary>
-    /// Materialization constructor used by Dapper when SQLite returns text values.
+    /// Materialization constructor used by Dapper when Sqlite returns text values.
     /// </summary>
     /// <param name="VehicleId">Vehicle identifier as string.</param>
     /// <param name="LicensePlate">Vehicle license plate.</param>
@@ -36,7 +36,7 @@ public sealed record CustomerRentalHistoryResultDto(
     }
 
     /// <summary>
-    /// Parses a SQLite date representation to <see cref="DateOnly"/>.
+    /// Parses a Sqlite date representation to <see cref="DateOnly"/>.
     /// </summary>
     /// <param name="value">Date value to parse.</param>
     /// <returns>The parsed date.</returns>

@@ -1,4 +1,6 @@
-using RentingPrototype.Application.RentalHistory.Queries;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using RentingPrototype.Application.RentalHistory.Queries.CustomerRentalHistory;
 using RentingPrototype.Application.RentalHistory.Queries.VehicleRentalHistory;
 
@@ -11,7 +13,7 @@ public static class RentalHistoryEndpoints
     /// </summary>
     /// <param name="app">Application route builder.</param>
     /// <returns>The configured route group.</returns>
-    public static RouteGroupBuilder MapRentalHistoryEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder MapRentalHistoryEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/rentalhistory").WithTags("RentalHistory");
 

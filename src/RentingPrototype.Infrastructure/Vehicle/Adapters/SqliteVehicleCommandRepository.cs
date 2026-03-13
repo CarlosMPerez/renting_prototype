@@ -1,7 +1,7 @@
 using Dapper;
 using RentingPrototype.Application.Vehicle.Ports;
 using VehicleDomain = RentingPrototype.Domain.VehicleDomain;
-using RentingPrototype.Infrastructure.Persistence.SQLite;
+using RentingPrototype.Infrastructure.Persistence.Sqlite;
 
 namespace RentingPrototype.Infrastructure.Vehicle.Adapters;
 
@@ -12,7 +12,7 @@ public sealed class SqliteVehicleCommandRepository : IVehicleCommandRepository
     /// <summary>
     /// Creates a vehicle command repository bound to the active unit of work.
     /// </summary>
-    /// <param name="uow">SQLite unit of work.</param>
+    /// <param name="uow">Sqlite unit of work.</param>
     public SqliteVehicleCommandRepository(SqliteUnitOfWork uow)
     {
         _uow = uow;

@@ -12,7 +12,7 @@ public sealed class SqliteVehicleQueryRepository : IVehicleQueryRepository
     /// <summary>
     /// Creates a vehicle query repository.
     /// </summary>
-    /// <param name="factory">SQLite connection factory.</param>
+    /// <param name="factory">Sqlite connection factory.</param>
     public SqliteVehicleQueryRepository(ISqliteConnectionFactory factory)
         => _factory = factory;
 

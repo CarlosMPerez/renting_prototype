@@ -11,7 +11,7 @@ Permite:
 - Cerrar un alquiler (`return`).
 - Consultar historial de alquileres por vehículo y por cliente.
 
-La persistencia usa SQLite con datos semilla, por lo que el proyecto puede ejecutarse sin infraestructura externa.
+La persistencia usa Sqlite con datos semilla, por lo que el proyecto puede ejecutarse sin infraestructura externa.
 
 ## 2) Arquitectura y patrones
 
@@ -24,7 +24,7 @@ La solución está separada en capas:
 - `src/RentingPrototype.Domain`
   - Entidades (`Vehicle`, `Rental`) y reglas de negocio.
 - `src/RentingPrototype.Infrastructure`
-  - Persistencia SQLite + Dapper, repositorios y Unit of Work.
+  - Persistencia Sqlite + Dapper, repositorios y Unit of Work.
 
 Patrones aplicados:
 - Arquitectura por capas.

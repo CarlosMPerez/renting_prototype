@@ -16,7 +16,7 @@ RentingPrototype es una API REST en .NET 9 (Minimal API) para gestionar:
 - Cierre de alquiler (return).
 - Consulta de historico de alquileres por vehiculo y por cliente.
 
-La persistencia usa SQLite + Dapper, con esquema SQL y seed inicial.
+La persistencia usa Sqlite + Dapper, con esquema SQL y seed inicial.
 
 Arquitectura principal:
 - Arquitectura por capas (Api / Application / Domain / Infrastructure).
@@ -38,7 +38,7 @@ Carpetas:
 - src/RentingPrototype.Domain
   - Entidades de dominio y reglas de negocio.
 - src/RentingPrototype.Infrastructure
-  - Repositorios SQLite (Dapper), UnitOfWork, schema SQL.
+  - Repositorios Sqlite (Dapper), UnitOfWork, schema SQL.
 - test/RentingPrototype.UnitTests
   - Tests de dominio y handlers con dobles de prueba.
 - test/RentingPrototype.IntegrationTests
@@ -141,7 +141,7 @@ Trade-off:
 ============================================================
 
 Tecnologias:
-- SQLite (archivo local o in-memory en tests).
+- Sqlite (archivo local o in-memory en tests).
 - Dapper para mapeo ligero SQL -> DTO/entidades.
 
 Implementaciones clave:
@@ -159,7 +159,7 @@ Trade-off:
 - Riesgo de drift entre dominio y SQL si no se testea.
 
 Detalle relevante para entrevista:
-- DTOs de lectura tienen constructores que parsean strings (GUID/Date) porque SQLite devuelve texto y Dapper materializa por nombre.
+- DTOs de lectura tienen constructores que parsean strings (GUID/Date) porque Sqlite devuelve texto y Dapper materializa por nombre.
 
 ============================================================
 7) BASE DE DATOS: SCHEMA, CONSTRAINTS Y SEED
@@ -197,7 +197,7 @@ Decision de diseno:
 
 Program.cs hace:
 - Crea schema automaticamente al iniciar.
-- Modo Testing: SQLite in-memory con conexion keep-alive por host para aislamiento.
+- Modo Testing: Sqlite in-memory con conexion keep-alive por host para aislamiento.
 - Modo normal: DB en data/rentingprototype.db.
 - Registra DI de connection factory, UoW, repositorios y handlers.
 - Expone OpenAPI y Scalar.
@@ -278,7 +278,7 @@ Decision de diseno:
 - Cumple requisitos tipicos de prueba tecnica: imagen final ligera, build reproducible, soporte VS y compose simple.
 
 Trade-off actual:
-- No hay volumen para persistir SQLite fuera del contenedor.
+- No hay volumen para persistir Sqlite fuera del contenedor.
   - Si se elimina el contenedor, se pierde la DB interna salvo volumen bind/mount.
 - ASPNETCORE_ENVIRONMENT en Development para contenedor; para produccion conviene Production.
 
@@ -291,7 +291,7 @@ Trade-off actual:
 - Coste: menos estructura out-of-the-box para filtros/pipelines complejos.
 
 2. Dapper + SQL explicito en lugar de EF Core
-- Ventaja: control exacto de queries y schema, simple para SQLite.
+- Ventaja: control exacto de queries y schema, simple para Sqlite.
 - Coste: mapping manual y mantenimiento SQL.
 
 3. CQRS ligero
@@ -306,7 +306,7 @@ Trade-off actual:
 - Ventaja: defensa en profundidad.
 - Coste: mantener consistencia entre capas.
 
-6. SQLite como almacenamiento principal
+6. Sqlite como almacenamiento principal
 - Ventaja: cero infraestructura externa, perfecto para demo/POC.
 - Coste: limitaciones de concurrencia y escalado frente a PostgreSQL/SQL Server.
 
@@ -333,7 +333,7 @@ Trade-off actual:
 5. Sin observabilidad avanzada
 - Faltan tracing/metrics estructuradas.
 
-6. SQLite en contenedor sin volumen
+6. Sqlite en contenedor sin volumen
 - Riesgo de perdida de estado al recrear contenedor.
 
 ============================================================
@@ -342,7 +342,7 @@ Trade-off actual:
 
 Guion corto sugerido:
 "La solucion esta separada en cuatro capas. Domain contiene reglas puras de negocio, Application implementa casos de uso con CQRS ligero, 
-Infrastructure implementa persistencia con SQLite y Dapper, y Api expone endpoints Minimal API y compone dependencias por DI. Para operaciones 
+Infrastructure implementa persistencia con Sqlite y Dapper, y Api expone endpoints Minimal API y compone dependencias por DI. Para operaciones 
 de escritura usamos Unit of Work transaccional. La consistencia se protege en dos niveles: validaciones en dominio/aplicacion y constraints en 
 base de datos. Tenemos tres niveles de tests: unitarios para reglas, integracion para flujos HTTP y host tests para composicion del sistema. 
 La dockerizacion es multi-stage y compatible con Visual Studio mediante perfil Docker, con compose para levantar rapido el servicio." 
@@ -358,13 +358,13 @@ P: Como garantizas que no haya dos alquileres abiertos del mismo vehiculo?
 R: En aplicacion verifico precondiciones y en DB lo refuerzo con indice unico parcial sobre vehicle_id donde end_date es null.
 
 P: Por que Dapper?
-R: Queria SQL explicito y ligero para una POC con SQLite. Menos abstraccion, control directo de queries y curva rapida.
+R: Queria SQL explicito y ligero para una POC con Sqlite. Menos abstraccion, control directo de queries y curva rapida.
 
 P: Donde pondrias mejoras para produccion?
 R: Middleware global de errores, auth, observabilidad, volumen de datos en Docker, migraciones versionadas y posible paso a Postgres.
 
 P: Como se aislan los tests de integracion?
-R: El entorno Testing crea SQLite in-memory con keep-alive por WebApplicationFactory; cada factory usa DB independiente.
+R: El entorno Testing crea Sqlite in-memory con keep-alive por WebApplicationFactory; cada factory usa DB independiente.
 
 ============================================================
 15) COMANDOS UTILES DE PREPARACION
