@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
+using RentingPrototype.TestUtilities;
 
 namespace RentingPrototype.IntegrationTests.RentalHistoryTesting;
 
@@ -118,10 +117,9 @@ public sealed class RentalHistoryEndpointsIntegrationTests
         Assert.Empty(payload!);
     }
 
-    private static WebApplicationFactory<Program> CreateFactory()
+    private static TestingWebApplicationFactory CreateFactory()
     {
-        return new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(b => b.UseEnvironment("Testing"));
+        return new TestingWebApplicationFactory();
     }
 
     private sealed record VehicleRentalHistoryItemDto(

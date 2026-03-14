@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
+using RentingPrototype.TestUtilities;
 
 namespace RentingPrototype.IntegrationTests.RentalTesting;
 
@@ -138,104 +137,70 @@ public sealed class RentalEndpointsIntegrationTests
     [Fact]
     public async Task RentAndReturnVehicle_WritesRentedAndReturnedEventsToLogsFile()
     {
-        var contentRoot = Path.Combine(Path.GetTempPath(), $"rentingprototype-api-{Guid.NewGuid():N}");
-        Directory.CreateDirectory(contentRoot);
+        await using var factory = CreateFactory();
+        var client = factory.CreateClient();
 
-        try
+        var rentResponse = await client.PostAsJsonAsync("/rentals/rent-vehicle", new
         {
-            await using var factory = CreateFactory(contentRoot);
-            var client = factory.CreateClient();
+            customerId = Customer1,
+            vehicleId = Vehicle1,
+            startDate = DateTime.UtcNow.AddDays(-2)
+        });
+        Assert.Equal(HttpStatusCode.Created, rentResponse.StatusCode);
 
-            var rentResponse = await client.PostAsJsonAsync("/rentals/rent-vehicle", new
-            {
-                customerId = Customer1,
-                vehicleId = Vehicle1,
-                startDate = DateTime.UtcNow.AddDays(-2)
-            });
-            Assert.Equal(HttpStatusCode.Created, rentResponse.StatusCode);
+        var created = await rentResponse.Content.ReadFromJsonAsync<CreatedResponse>();
+        Assert.NotNull(created);
 
-            var created = await rentResponse.Content.ReadFromJsonAsync<CreatedResponse>();
-            Assert.NotNull(created);
-
-            var returnResponse = await client.PostAsJsonAsync("/rentals/return-vehicle", new
-            {
-                id = created!.Id,
-                endDate = DateTime.UtcNow.AddDays(-1)
-            });
-            Assert.Equal(HttpStatusCode.OK, returnResponse.StatusCode);
-
-            var logFilePath = Path.Combine(contentRoot, "logs", "log.txt");
-            Assert.True(File.Exists(logFilePath));
-
-            var logText = await File.ReadAllTextAsync(logFilePath);
-            Assert.Contains("VehicleRentedDomainEvent", logText);
-            Assert.Contains("VehicleReturnedDomainEvent", logText);
-        }
-        finally
+        var returnResponse = await client.PostAsJsonAsync("/rentals/return-vehicle", new
         {
-            if (Directory.Exists(contentRoot))
-            {
-                Directory.Delete(contentRoot, recursive: true);
-            }
-        }
+            id = created!.Id,
+            endDate = DateTime.UtcNow.AddDays(-1)
+        });
+        Assert.Equal(HttpStatusCode.OK, returnResponse.StatusCode);
+
+        var logFilePath = Path.Combine(factory.ContentRootPath, "logs", "log.txt");
+        Assert.True(File.Exists(logFilePath));
+
+        var logText = await File.ReadAllTextAsync(logFilePath);
+        Assert.Contains("VehicleRentedDomainEvent", logText);
+        Assert.Contains("VehicleReturnedDomainEvent", logText);
     }
 
     [Fact]
     public async Task RentVehicle_WhenBusinessRuleFails_WritesExceptionToLogsFile()
     {
-        var contentRoot = Path.Combine(Path.GetTempPath(), $"rentingprototype-api-{Guid.NewGuid():N}");
-        Directory.CreateDirectory(contentRoot);
+        await using var factory = CreateFactory();
+        var client = factory.CreateClient();
 
-        try
+        var startDate = DateTime.UtcNow.AddDays(-1);
+
+        var first = await client.PostAsJsonAsync("/rentals/rent-vehicle", new
         {
-            await using var factory = CreateFactory(contentRoot);
-            var client = factory.CreateClient();
+            customerId = Customer1,
+            vehicleId = Vehicle1,
+            startDate
+        });
+        Assert.Equal(HttpStatusCode.Created, first.StatusCode);
 
-            var startDate = DateTime.UtcNow.AddDays(-1);
-
-            var first = await client.PostAsJsonAsync("/rentals/rent-vehicle", new
-            {
-                customerId = Customer1,
-                vehicleId = Vehicle1,
-                startDate
-            });
-            Assert.Equal(HttpStatusCode.Created, first.StatusCode);
-
-            var second = await client.PostAsJsonAsync("/rentals/rent-vehicle", new
-            {
-                customerId = Customer1,
-                vehicleId = Vehicle2,
-                startDate
-            });
-            Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
-
-            var logFilePath = Path.Combine(contentRoot, "logs", "log.txt");
-            Assert.True(File.Exists(logFilePath));
-
-            var logText = await File.ReadAllTextAsync(logFilePath);
-            Assert.Contains("BusinessRuleViolationException", logText);
-            Assert.Contains("\"Type\":\"exception\"", logText);
-        }
-        finally
+        var second = await client.PostAsJsonAsync("/rentals/rent-vehicle", new
         {
-            if (Directory.Exists(contentRoot))
-            {
-                Directory.Delete(contentRoot, recursive: true);
-            }
-        }
+            customerId = Customer1,
+            vehicleId = Vehicle2,
+            startDate
+        });
+        Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
+
+        var logFilePath = Path.Combine(factory.ContentRootPath, "logs", "log.txt");
+        Assert.True(File.Exists(logFilePath));
+
+        var logText = await File.ReadAllTextAsync(logFilePath);
+        Assert.Contains("BusinessRuleViolationException", logText);
+        Assert.Contains("\"Type\":\"exception\"", logText);
     }
 
-    private static WebApplicationFactory<Program> CreateFactory(string? contentRoot = null)
+    private static TestingWebApplicationFactory CreateFactory()
     {
-        return new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(b =>
-            {
-                b.UseEnvironment("Testing");
-                if (!string.IsNullOrWhiteSpace(contentRoot))
-                {
-                    b.UseContentRoot(contentRoot);
-                }
-            });
+        return new TestingWebApplicationFactory();
     }
 
     private sealed record CreatedResponse(Guid Id);

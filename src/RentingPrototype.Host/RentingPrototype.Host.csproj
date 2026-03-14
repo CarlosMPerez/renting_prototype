@@ -6,6 +6,26 @@
     <ProjectReference Include="..\RentingPrototype.Infrastructure\RentingPrototype.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="data/schema/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\RentingPrototype.Infrastructure\Persistence\Schema\rentingprototype-schema.sql">
+      <Link>data/schema/rentingprototype-schema.sql</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>data/schema/rentingprototype-schema.sql</TargetPath>
+    </Content>
+  </ItemGroup>
+
+  <Target Name="CopySchemaToHostContentRoot" BeforeTargets="Build">
+    <MakeDir Directories="$(MSBuildProjectDirectory)/data/schema" />
+    <Copy
+      SourceFiles="..\RentingPrototype.Infrastructure\Persistence\Schema\rentingprototype-schema.sql"
+      DestinationFiles="$(MSBuildProjectDirectory)/data/schema/rentingprototype-schema.sql"
+      SkipUnchangedFiles="true" />
+  </Target>
+
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>

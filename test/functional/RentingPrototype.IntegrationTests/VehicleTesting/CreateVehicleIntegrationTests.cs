@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
+using RentingPrototype.TestUtilities;
 using Xunit;
 
 namespace RentingPrototype.IntegrationTests.VehicleTesting;
@@ -11,8 +10,7 @@ public sealed class CreateVehicleIntegrationTests
     [Fact]
     public async Task PostVehicles_Returns201()
     {
-        await using var factory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(b => b.UseEnvironment("Testing"));
+        await using var factory = new TestingWebApplicationFactory();
 
         var client = factory.CreateClient();
 
@@ -32,45 +30,26 @@ public sealed class CreateVehicleIntegrationTests
     [Fact]
     public async Task PostVehicles_WritesDomainEventToLogsFile()
     {
-        var contentRoot = Path.Combine(Path.GetTempPath(), $"rentingprototype-api-{Guid.NewGuid():N}");
-        Directory.CreateDirectory(contentRoot);
+        await using var factory = new TestingWebApplicationFactory();
+        var client = factory.CreateClient();
 
-        try
+        var payload = new
         {
-            await using var factory = new WebApplicationFactory<Program>()
-                .WithWebHostBuilder(b =>
-                {
-                    b.UseEnvironment("Testing");
-                    b.UseContentRoot(contentRoot);
-                });
+            licensePlate = "1111-EVT",
+            brand = "Seat",
+            model = "Ibiza",
+            manufactureDateUtc = "2024-01-01T00:00:00Z"
+        };
 
-            var client = factory.CreateClient();
+        var response = await client.PostAsJsonAsync("/vehicles", payload);
 
-            var payload = new
-            {
-                licensePlate = "1111-EVT",
-                brand = "Seat",
-                model = "Ibiza",
-                manufactureDateUtc = "2024-01-01T00:00:00Z"
-            };
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-            var response = await client.PostAsJsonAsync("/vehicles", payload);
+        var logFilePath = Path.Combine(factory.ContentRootPath, "logs", "log.txt");
+        Assert.True(File.Exists(logFilePath));
 
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-
-            var logFilePath = Path.Combine(contentRoot, "logs", "log.txt");
-            Assert.True(File.Exists(logFilePath));
-
-            var logText = await File.ReadAllTextAsync(logFilePath);
-            Assert.Contains("VehicleCreatedDomainEvent", logText);
-            Assert.Contains("1111-EVT", logText);
-        }
-        finally
-        {
-            if (Directory.Exists(contentRoot))
-            {
-                Directory.Delete(contentRoot, recursive: true);
-            }
-        }
+        var logText = await File.ReadAllTextAsync(logFilePath);
+        Assert.Contains("VehicleCreatedDomainEvent", logText);
+        Assert.Contains("1111-EVT", logText);
     }
 }

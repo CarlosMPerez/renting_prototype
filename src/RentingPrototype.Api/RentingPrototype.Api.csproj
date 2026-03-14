@@ -6,13 +6,6 @@
   </ItemGroup>
 
   <ItemGroup>
-  <Content Include="..\RentingPrototype.Infrastructure\Persistence\Schema\rentingprototype-schema.sql">
-    <Link>rentingprototype-schema.sql</Link>
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </Content>
-</ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Endpoints/Rental/" />
     <Folder Include="Endpoints/RentalHistory/" />
     <Folder Include="Endpoints/Vehicle/" />
