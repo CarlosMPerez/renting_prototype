@@ -1,400 +1,245 @@
-RESUMEN TECNICO DEL REPOSITORIO - RENTING PROTOTYPE
-Fecha de analisis: 2026-03-08
-Ruta analizada: /home/carlos/work/renting_prototype
-
-OBJETIVO DE ESTE DOCUMENTO
-Este documento esta pensado para preparar una entrevista tecnica. No solo describe codigo, tambien explica decisiones de arquitectura, patrones, trade-offs y puntos de mejora que puedes defender con argumentos.
-
-============================================================
-1) VISTA GENERAL DEL SISTEMA
-============================================================
-
-RentingPrototype es una API REST en .NET 9 (Minimal API) para gestionar:
-- Alta de vehiculos.
-- Consulta de vehiculos (todos, por id, disponibles).
-- Inicio de alquiler (rent).
-- Cierre de alquiler (return).
-- Consulta de historico de alquileres por vehiculo y por cliente.
-
-La persistencia usa Sqlite + Dapper, con esquema SQL y seed inicial.
-
-Arquitectura principal:
-- Arquitectura por capas (Api / Application / Domain / Infrastructure).
-- CQRS ligero (lecturas y escrituras separadas por handlers y repositorios).
-- Repository pattern (abstraccion de acceso a datos).
-- Unit of Work (frontera transaccional en comandos).
-
-============================================================
-2) ESTRUCTURA DE SOLUCION Y DEPENDENCIAS
-============================================================
-
-Solucion principal: RentingPrototype.sln (raiz)
-
-Carpetas:
-- src/RentingPrototype.Api
-  - Exposicion HTTP, DI, OpenAPI, Scalar, bootstrap de DB.
-- src/RentingPrototype.Application
-  - Casos de uso (handlers), DTOs, interfaces y abstracciones.
-- src/RentingPrototype.Domain
-  - Entidades de dominio y reglas de negocio.
-- src/RentingPrototype.Infrastructure
-  - Repositorios Sqlite (Dapper), UnitOfWork, schema SQL.
-- test/RentingPrototype.UnitTests
-  - Tests de dominio y handlers con dobles de prueba.
-- test/RentingPrototype.IntegrationTests
-  - Tests E2E via HTTP in-memory.
-- test/RentingPrototype.HostTests
-  - Tests de composicion del host/DI/rutas/documentacion.
-
-Direccion de dependencias (limpia y coherente):
-- Domain: no depende de nadie.
-- Application -> Domain.
-- Infrastructure -> Application + Domain.
-- Api -> Application + Infrastructure.
-
-============================================================
-3) FLUJO DE UNA PETICION (EJEMPLO REAL)
-============================================================
-
-Ejemplo: POST /rentals/rent-vehicle
-
-1. Endpoint Minimal API (RentalEndpoints) recibe DTO.
-2. Inyecta CreateRentalHandler desde DI.
-3. Handler valida precondiciones consultando IRentalQueryRepository:
-   - Cliente con alquiler abierto.
-   - Vehiculo con alquiler abierto.
-4. Si pasa validacion, crea entidad Rental del dominio.
-5. Inicia transaccion con IUnitOfWork (BeginAsync).
-6. Persiste via IRentalCommandRepository.CreateAsync.
-7. Commit transaccional.
-8. Devuelve 201 Created con id.
-9. Si algo falla, rollback y excepcion traducida a HTTP (400/500 en endpoint).
-
-Observacion importante para entrevista:
-- Hay doble proteccion de consistencia:
-  - Validacion en aplicacion (rapida y explicita).
-  - Constraint unico parcial en DB (ultima barrera ante concurrencia).
-
-============================================================
-4) CAPA DOMAIN (REGLAS DE NEGOCIO)
-============================================================
-
-Entidad Vehicle:
-- Invariantes:
-  - id no vacio.
-  - matricula requerida y max 20.
-  - marca requerida y max 100.
-  - modelo requerido y max 100.
-  - fecha de fabricacion no mas antigua de 5 anios.
-- Normaliza strings con Trim().
-- Fuerza DateTimeKind.Utc en manufactureDateUtc.
-
-Entidad Rental:
-- Invariantes:
-  - customerId no vacio.
-  - vehicleId no vacio.
-  - startDate no puede estar en futuro.
-  - endDate (si existe) no puede ser anterior a startDate.
-
-Decision clave:
-- El dominio concentra reglas de negocio, no SQL ni HTTP.
-- Esto facilita test unitarios directos y evita logica de negocio en controladores.
-
-Trade-off:
-- Rental.Create usa DateTime.UtcNow internamente para comparar fechas futuras. Esto es simple, pero menos controlable en tests que inyectar un reloj (IClock).
-
-============================================================
-5) CAPA APPLICATION (CASOS DE USO)
-============================================================
-
-Patron aplicado:
-- Handlers por caso de uso, separados en comandos (write) y queries (read).
-
-Comandos:
-- CreateVehicleHandler
-- CreateRentalHandler
-- UpdateRentalHandler
-
-Queries:
-- GetVehicleByIdQueryHandler
-- GetAllVehiclesQueryHandler
-- GetAvailableVehiclesQueryHandler
-- GetRentalByIdQueryHandler
-- VehicleRentalHistoryQueryHandler
-- CustomerRentalHistoryQueryHandler
-
-Abstracciones:
-- IUnitOfWork: Begin/Commit/Rollback
-- Interfaces de repositorio por agregado y por tipo de operacion.
-- IQueryHandler<TQuery, TResult> para homogeneizar consultas.
-
-Decision de diseno:
-- CQRS ligero: separa responsabilidades sin introducir bus de comandos/eventos.
-- Bueno para prototipo: bajo coste cognitivo, estructura clara, crecimiento gradual.
-
-Trade-off:
-- Aun no hay pipeline cross-cutting (validacion centralizada, logging, metrics, retries).
-- El manejo de errores esta repetido en endpoints (try/catch por metodo).
-
-============================================================
-6) CAPA INFRASTRUCTURE (PERSISTENCIA)
-============================================================
-
-Tecnologias:
-- Sqlite (archivo local o in-memory en tests).
-- Dapper para mapeo ligero SQL -> DTO/entidades.
-
-Implementaciones clave:
-- SqliteConnectionFactory: crea conexiones a partir de connection string.
-- SqliteUnitOfWork: abre conexion, inicia transaccion y gestiona ciclo de vida.
-- Repositorios de comando usan SqliteUnitOfWork (misma transaccion).
-- Repositorios de query abren conexion por operacion (sin transaccion).
-
-Decision de diseno:
-- SQL explicito en repositorios (sin ORM pesado) para control fino.
-- Transacciones solo en escrituras.
-
-Trade-off:
-- Mas control y rendimiento predecible, pero mas codigo SQL manual.
-- Riesgo de drift entre dominio y SQL si no se testea.
-
-Detalle relevante para entrevista:
-- DTOs de lectura tienen constructores que parsean strings (GUID/Date) porque Sqlite devuelve texto y Dapper materializa por nombre.
-
-============================================================
-7) BASE DE DATOS: SCHEMA, CONSTRAINTS Y SEED
-============================================================
-
-Archivo: src/RentingPrototype.Infrastructure/Persistence/Schema/rentingprototype-schema.sql
-
-Tablas:
-- vehicles
-- customers
-- rental_history
-
-Constraints relevantes:
-- PK en las tres tablas.
-- FK en rental_history hacia vehicles y customers.
-- CHECK de longitudes (matricula, marca, etc).
-- CHECK: end_date >= start_date.
-- UNIQUE en document_id de customer.
-- UNIQUE en license_plate de vehicle.
-- UNIQUE parcial para alquiler abierto:
-  - un solo alquiler abierto por cliente (end_date IS NULL)
-  - un solo alquiler abierto por vehiculo (end_date IS NULL)
-
-Semilla de datos:
-- 10 clientes.
-- 20 vehiculos.
-- 40 alquileres historicos.
-
-Decision de diseno:
-- Seed de negocio suficiente para probar queries de historico y disponibilidad sin dependencias externas.
-
-============================================================
-8) CAPA API (MINIMAL API + DI + OPENAPI)
-============================================================
-
-Program.cs hace:
-- Crea schema automaticamente al iniciar.
-- Modo Testing: Sqlite in-memory con conexion keep-alive por host para aislamiento.
-- Modo normal: DB en data/rentingprototype.db.
-- Registra DI de connection factory, UoW, repositorios y handlers.
-- Expone OpenAPI y Scalar.
-- Ruta raiz redirige a /scalar.
-
-Endpoints agrupados:
-- /vehicles
-- /rentals
-- /rentalhistory
-
-Mapeo de errores:
-- ArgumentException/InvalidOperationException -> 400
-- KeyNotFoundException (return rental) -> 400
-- Otros -> 500
-
-Observacion para entrevista:
-- El endpoint de historico retorna 404 solo si handler devuelve null, pero los repositorios actualmente devuelven lista (vacia o con datos), por lo que en la practica "no encontrado" devuelve 200 con lista vacia. Es un contrato valido, pero hay que explicarlo de forma consistente.
-
-============================================================
-9) ESTRATEGIA DE TESTING
-============================================================
-
-Tipos de test:
-1. Unit tests
-- Dominio: invariantes de Vehicle y Rental.
-- Application handlers: control de transacciones (begin/commit/rollback) y reglas.
-- DTO parsing de historico.
-
-2. Integration tests
-- API real in-memory (WebApplicationFactory + env Testing).
-- Verifica rutas HTTP, codigos, side effects y orden de historico.
-
-3. Host tests
-- Valida que DI tenga todos los servicios.
-- Verifica exposicion de OpenAPI y Scalar.
-- Verifica aislamiento de base in-memory entre factories.
-
-Resultado ejecutado el 2026-03-08:
-- UnitTests: 34/34 OK.
-- IntegrationTests: 14/14 OK.
-- HostTests: 5/5 OK.
-- Total: 53 tests OK.
-
-============================================================
-10) DOCKERIZACION (IMPLEMENTACION ACTUAL)
-============================================================
-
-Archivos:
-- /home/carlos/work/renting_prototype/Dockerfile
-- /home/carlos/work/renting_prototype/docker-compose.yml
-- /home/carlos/work/renting_prototype/.dockerignore
-- launch profile "Container (Dockerfile)" en Api/Properties/launchSettings.json
-
-Dockerfile:
-- Multi-stage build.
-- Stage build: mcr.microsoft.com/dotnet/sdk:9.0
-  - copia csproj primero (cache de restore)
-  - dotnet restore
-  - copia resto de repo
-  - dotnet publish Release
-- Stage runtime: mcr.microsoft.com/dotnet/aspnet:9.0
-  - expone puerto 8080
-  - ASPNETCORE_URLS=http://+:8080
-  - ASPNETCORE_ENVIRONMENT=Development
-  - entrypoint a RentingPrototype.Api.dll
-
-docker-compose:
-- Servicio renting-api.
-- Build desde Dockerfile de raiz.
-- Mapea 8080:8080.
-- restart: unless-stopped.
-- Variables de entorno de ASP.NET.
-
-launchSettings (Visual Studio):
-- Perfil "Container (Dockerfile)" habilita arranque directo en Docker desde VS.
-
-Decision de diseno:
-- Cumple requisitos tipicos de prueba tecnica: imagen final ligera, build reproducible, soporte VS y compose simple.
-
-Trade-off actual:
-- No hay volumen para persistir Sqlite fuera del contenedor.
-  - Si se elimina el contenedor, se pierde la DB interna salvo volumen bind/mount.
-- ASPNETCORE_ENVIRONMENT en Development para contenedor; para produccion conviene Production.
-
-============================================================
-11) DECISIONES DE DISENO IMPORTANTES Y JUSTIFICACION
-============================================================
-
-1. Minimal API en lugar de Controllers
-- Ventaja: menos friccion, ideal para prototipo, lectura rapida.
-- Coste: menos estructura out-of-the-box para filtros/pipelines complejos.
-
-2. Dapper + SQL explicito en lugar de EF Core
-- Ventaja: control exacto de queries y schema, simple para Sqlite.
-- Coste: mapping manual y mantenimiento SQL.
-
-3. CQRS ligero
-- Ventaja: separar lectura/escritura mejora claridad y evolucion.
-- Coste: mas clases/DTOs que enfoque CRUD puro.
-
-4. UoW transaccional en comandos
-- Ventaja: atomicidad y rollback claro.
-- Coste: requiere disciplina en repositorios para respetar transaccion activa.
-
-5. Validacion duplicada (dominio + DB)
-- Ventaja: defensa en profundidad.
-- Coste: mantener consistencia entre capas.
-
-6. Sqlite como almacenamiento principal
-- Ventaja: cero infraestructura externa, perfecto para demo/POC.
-- Coste: limitaciones de concurrencia y escalado frente a PostgreSQL/SQL Server.
-
-============================================================
-12) RIESGOS / LIMITACIONES ACTUALES (PARA DISCUTIR EN ENTREVISTA)
-============================================================
-
-1. Concurrencia entre chequeo y escritura
-- En CreateRentalHandler se chequea "open rental" antes de insertar.
-- Puede haber carrera; mitigado por unique indexes parciales en DB.
-- Recomendacion: capturar violacion de constraint y traducir a error de dominio mas explicito.
-
-2. Manejo de errores repetido en endpoints
-- Mucho try/catch duplicado.
-- Recomendacion: middleware de excepciones global + problem details.
-
-3. Contrato 404 vs lista vacia en historico
-- Endpoints tienen logica de 404 por null, pero repos devuelven listas.
-- Recomendacion: fijar contrato explicito y simplificar endpoint.
-
-4. Falta de autenticacion/autorizacion
-- Correcto para prototipo, pero no productivo.
-
-5. Sin observabilidad avanzada
-- Faltan tracing/metrics estructuradas.
-
-6. Sqlite en contenedor sin volumen
-- Riesgo de perdida de estado al recrear contenedor.
-
-============================================================
-13) COMO EXPLICAR LA ARQUITECTURA EN 2-3 MINUTOS
-============================================================
-
-Guion corto sugerido:
-"La solucion esta separada en cuatro capas. Domain contiene reglas puras de negocio, Application implementa casos de uso con CQRS ligero, 
-Infrastructure implementa persistencia con Sqlite y Dapper, y Api expone endpoints Minimal API y compone dependencias por DI. Para operaciones 
-de escritura usamos Unit of Work transaccional. La consistencia se protege en dos niveles: validaciones en dominio/aplicacion y constraints en 
-base de datos. Tenemos tres niveles de tests: unitarios para reglas, integracion para flujos HTTP y host tests para composicion del sistema. 
-La dockerizacion es multi-stage y compatible con Visual Studio mediante perfil Docker, con compose para levantar rapido el servicio." 
-
-============================================================
-14) PREGUNTAS PROBABLES EN ENTREVISTA Y RESPUESTA CORTA
-============================================================
-
-P: Por que CQRS y no CRUD simple?
-R: Para separar claramente lectura y escritura desde el inicio, manteniendo complejidad baja. Facilita evolucion hacia validaciones y optimizaciones especificas por flujo.
-
-P: Como garantizas que no haya dos alquileres abiertos del mismo vehiculo?
-R: En aplicacion verifico precondiciones y en DB lo refuerzo con indice unico parcial sobre vehicle_id donde end_date es null.
-
-P: Por que Dapper?
-R: Queria SQL explicito y ligero para una POC con Sqlite. Menos abstraccion, control directo de queries y curva rapida.
-
-P: Donde pondrias mejoras para produccion?
-R: Middleware global de errores, auth, observabilidad, volumen de datos en Docker, migraciones versionadas y posible paso a Postgres.
-
-P: Como se aislan los tests de integracion?
-R: El entorno Testing crea Sqlite in-memory con keep-alive por WebApplicationFactory; cada factory usa DB independiente.
-
-============================================================
-15) COMANDOS UTILES DE PREPARACION
-============================================================
-
-Desde /home/carlos/work/renting_prototype:
-
-- Restaurar:
-  dotnet restore RentingPrototype.sln
-
-- Ejecutar API:
-  dotnet run --project src/RentingPrototype.Api
-
-- Tests:
-  dotnet test RentingPrototype.sln
-
-- Docker build:
-  docker build -t rentingprototype:local .
-
-- Docker run:
-  docker run --rm -p 8080:8080 rentingprototype:local
-
-- Compose:
-  docker compose up --build
-
-============================================================
-16) RESUMEN EJECUTIVO
-============================================================
-
-Es un proyecto bien estructurado para una prueba tecnica: arquitectura por capas limpia, CQRS ligero, reglas de negocio claras en dominio, 
-persistencia SQL controlada con Dapper, y testing robusto en tres niveles. La dockerizacion esta correctamente implementada con 
-multi-stage + compose + perfil Docker de Visual Studio. En entrevista, el mejor enfoque es destacar la intencionalidad del diseno y demostrar 
-que conoces tanto sus fortalezas como sus trade-offs y mejoras naturales hacia produccion.
+Chuleta rápida para entrevista: RentingPrototype
+===============================================
+
+1. Qué es el proyecto
+---------------------
+
+API REST en .NET 9 con Minimal API para gestionar un prototipo de renting:
+- alta de vehículos,
+- consulta de vehículos,
+- alquiler,
+- devolución,
+- historial.
+
+Objetivo técnico:
+- demostrar diseño limpio,
+- separación de capas,
+- DDD ligero,
+- puertos y adaptadores,
+- manejo de errores,
+- testing y Docker.
+
+
+2. Cómo está separada la solución
+---------------------------------
+
+`RentingPrototype.Domain`
+- Núcleo de negocio.
+- Entidades: `Vehicle`, `Rental`.
+- Value Objects: `VehicleId`, `LicensePlate`, `ManufactureDateOnly`.
+- Domain Events.
+- Excepciones de dominio.
+
+`RentingPrototype.Application`
+- Casos de uso.
+- Handlers de comandos y queries.
+- Puertos: repositorios, unit of work, dispatcher de eventos, log sink.
+- Orquesta dominio e infraestructura sin conocer implementaciones concretas.
+
+`RentingPrototype.Api`
+- Adaptador de entrada HTTP.
+- Endpoints Minimal API.
+- Contratos HTTP.
+- Validación superficial de request.
+
+`RentingPrototype.Infrastructure`
+- Adaptadores de salida.
+- Sqlite + Dapper.
+- Repositorios concretos.
+- `SqliteUnitOfWork`.
+- inicialización de base de datos.
+- logging estructurado a fichero.
+
+`RentingPrototype.Host`
+- Ejecutable real.
+- Composition root.
+- Configura DI, manejo global de excepciones, OpenAPI y Scalar.
+
+
+3. Cómo defender la arquitectura
+--------------------------------
+
+Mensaje corto:
+
+"He organizado la solución en dominio, aplicación, adaptadores HTTP, infraestructura y host. El dominio contiene las reglas puras. La aplicación define los casos de uso y los puertos. La infraestructura implementa esos puertos. La API solo adapta HTTP a aplicación. El host compone todo."
+
+Si te dicen "¿es hexagonal de verdad?":
+- Sí en el sentido práctico:
+  - aplicación define puertos,
+  - infraestructura implementa adaptadores,
+  - API es adaptador de entrada,
+  - dominio queda aislado.
+- No he buscado pureza académica extrema, sino una estructura defendible para una prueba técnica.
+
+
+4. Flujo de una petición correcta
+---------------------------------
+
+Ejemplo: `POST /vehicles`
+
+1. Llega HTTP.
+2. Minimal API hace model binding a `CreateVehicleRequest`.
+3. El endpoint valida DataAnnotations.
+4. El endpoint construye `CreateVehicleCommandDto`.
+5. El handler llama al dominio: `Vehicle.Create(...)`.
+6. El dominio valida reglas y genera `VehicleCreatedDomainEvent`.
+7. El handler abre transacción con `IUnitOfWork`.
+8. El repositorio guarda en Sqlite con Dapper.
+9. Se hace commit.
+10. Se despachan domain events.
+11. Se devuelve `201 Created`.
+
+
+5. Flujo de error por validación
+--------------------------------
+
+Ejemplo: request HTTP inválida.
+
+1. Llega el JSON.
+2. El endpoint valida el request.
+3. Si falla, devuelve `ValidationProblem`.
+4. Normalmente responde `400 Bad Request`.
+
+Idea clave:
+- esto corta el flujo antes de tocar aplicación, dominio o base de datos.
+
+
+6. Flujo de error por excepción
+-------------------------------
+
+Ejemplo: cliente intenta alquilar un segundo vehículo sin devolver el primero.
+
+1. El endpoint recibe request válida.
+2. El handler consulta repositorios.
+3. Detecta incumplimiento de regla.
+4. Lanza `BusinessRuleViolationException`.
+5. La excepción sube al `GlobalExceptionHandler`.
+6. El handler global la transforma en `409 Conflict`.
+7. Se devuelve `ProblemDetails`.
+8. Además se registra log estructurado con `traceId`.
+
+Idea clave:
+- los endpoints no repiten `try/catch`,
+- el error queda centralizado y consistente.
+
+
+7. Qué aporta DDD aquí
+----------------------
+
+- Entidades con reglas de negocio dentro.
+- Value Objects para evitar primitivas débiles.
+- Domain Events para reflejar hechos relevantes del negocio.
+- Excepciones tipadas para reglas e invariantes.
+
+Mensaje defendible:
+
+"No he montado un DDD gigantesco, pero sí un DDD ligero y útil: el negocio vive en dominio y no en los endpoints."
+
+
+8. Qué aporta CQRS aquí
+-----------------------
+
+- Separación simple entre escritura y lectura.
+- Handlers de comando para cambios.
+- Handlers/query repos para consultas.
+- No hay una infraestructura compleja de mensajería, porque no hacía falta para esta prueba.
+
+
+9. Testing: cómo explicarlo en 30 segundos
+------------------------------------------
+
+Hay tres niveles:
+
+`Unit tests`
+- prueban lógica aislada con fakes.
+- ejemplo: `CreateVehicleHandlerTests`.
+
+`Integration tests`
+- prueban extremo a extremo dentro del proceso.
+- ejemplo: `POST /vehicles` y comprobar que se escribe el domain event en logs.
+
+`Host tests`
+- prueban composición y arranque.
+- ejemplo: comprobar que DI registra `IUnitOfWork`, repositorios, OpenAPI y endpoints.
+
+Mensaje defendible:
+
+"No me limité a probar clases sueltas; también probé que la aplicación ensamblada funciona."
+
+
+10. Persistencia e infraestructura
+----------------------------------
+
+Base de datos:
+- Sqlite.
+
+Acceso a datos:
+- Dapper.
+
+Motivo:
+- menos complejidad,
+- SQL explícito,
+- muy defendible para una prueba técnica.
+
+Transacciones:
+- `SqliteUnitOfWork`.
+
+Inicialización:
+- al arrancar, si la base no existe, se crea y se aplica el schema.
+
+
+11. Logging y errores
+---------------------
+
+- Logging estructurado en JSON.
+- Se registran excepciones y domain events.
+- Las excepciones se transforman en respuestas HTTP coherentes.
+- Los errores no controlados devuelven `500` sin filtrar detalles internos al cliente.
+
+
+12. Docker
+----------
+
+Qué hace:
+- el `Dockerfile` publica `RentingPrototype.Host`,
+- el contenedor arranca `RentingPrototype.Host.dll`,
+- `docker compose` monta datos, schema y logs.
+
+Comandos clave:
+
+`docker build -t rentingprototype:local .`
+
+`docker run --rm -p 8080:8080 rentingprototype:local`
+
+`docker compose up --build`
+
+
+13. Fortalezas que puedes vender
+--------------------------------
+
+- Separación clara de responsabilidades.
+- Dominio razonablemente bien encapsulado.
+- Puertos y adaptadores bien visibles.
+- Manejo global de excepciones.
+- Logging estructurado.
+- Tests en varios niveles.
+- Proyecto ejecutable localmente y en Docker.
+
+
+14. Limitaciones que puedes reconocer sin problema
+--------------------------------------------------
+
+- No busca ser un producto enterprise completo.
+- La observabilidad está en un nivel razonable para prueba técnica, no con dashboarding ni telemetry avanzada.
+- CQRS y DDD están aplicados de forma ligera, no maximalista.
+- Sqlite es una elección pragmática para prototipo.
+
+Mensaje defendible:
+
+"He priorizado decisiones proporcionales al alcance de una prueba técnica: suficiente calidad arquitectónica sin sobrediseñar."
+
+
+15. Frase final para cerrar bien
+--------------------------------
+
+"Mi intención con esta prueba no fue solo hacer que funcionase, sino que fuese fácil de explicar, fácil de evolucionar y técnicamente defendible."

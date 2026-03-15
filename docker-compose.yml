@@ -11,6 +11,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./data:/app/data
+      - ./src/RentingPrototype.Host/data/schema:/app/data/schema:ro
+      - ./logs:/app/logs
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080

@@ -88,3 +88,10 @@ Thumbs.db
 # =========================
 codex.toml
 .codex
+
+# =========================
+# Data and documentation
+# =========================
+/data
+doc/*.*
+/doc
