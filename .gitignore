@@ -92,6 +92,5 @@ codex.toml
 # =========================
 # Data and documentation
 # =========================
-/data
-doc/*.*
-/doc
+/data/
+/doc/
