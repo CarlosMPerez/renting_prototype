@@ -154,6 +154,7 @@ dotnet test RentingPrototype.sln
   - Refactorizados Handlers, introducidos DomainEvents, Dispatchers, Tests, etc.
   - Terminado 2026-03-11
 3. Mejora de arquitectura hexagonal
+  - Terminado 2026-03-15
 4. Mejora del manejo de excepciones
   - Se ha introducido un manejo global de excepciones
   - Se han introducido requests para manejar validaciones si usar componentes externos como FluentValidator
@@ -165,4 +166,6 @@ dotnet test RentingPrototype.sln
   - Excepciones de negocio propias quedan logeadas pero sin stack trace para no engordar el log innecesariamente
   - Terminado 2026-03-12
 5. Añadir observabilidad
+  - No se añade.
 6. Añadir logging estructurado
+  - Terminado 2026-03-15
