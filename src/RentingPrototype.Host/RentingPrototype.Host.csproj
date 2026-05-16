@@ -17,10 +17,11 @@
       <TargetPath>data/schema/rentingprototype-schema.sql</TargetPath>
     </Content>
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
-  </ItemGroup>
+<ItemGroup>
+  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+  <PackageReference Include="Scalar.AspNetCore" Version="2.14.14" />
+  <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+</ItemGroup>
 
   <Target Name="CopySchemaToHostContentRoot" BeforeTargets="Build">
     <MakeDir Directories="$(MSBuildProjectDirectory)/data/schema" />
@@ -31,7 +32,7 @@
   </Target>
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>

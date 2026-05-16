@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Hosting;
 using RentingPrototype.Infrastructure.Configuration;
@@ -8,7 +7,7 @@ namespace RentingPrototype.Infrastructure.Persistence.Sqlite;
 public static class SqliteDatabaseInitializer
 {
     public static SqliteDatabaseInitializationResult Initialize(
-        IWebHostEnvironment environment,
+        IHostEnvironment environment,
         StoragePaths storagePaths)
     {
         if (environment.IsEnvironment("Testing"))

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace RentingPrototype.Infrastructure.Configuration;
 
@@ -30,7 +30,7 @@ public sealed class StoragePaths
         ApplicationLogFilePath = applicationLogFilePath;
     }
 
-    public static StoragePaths From(IWebHostEnvironment environment)
+    public static StoragePaths From(IHostEnvironment environment)
     {
         var contentRootPath = environment.ContentRootPath;
 
